@@ -187,6 +187,8 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String brewMinute;
     @CustomKey("Brew_Alc")
     private String brewAlc;
+	@CustomKey("Brew_Alcoholic")
+	private String brewAlcoholic;
     @CustomKey("Brew_Brewer")
     private String brewBrewer;
 
