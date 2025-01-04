@@ -86,16 +86,19 @@ public final class BreweryPlugin extends JavaPlugin {
 	private final Map<String, Function<ItemLoader, Ingredient>> ingredientLoaders = new HashMap<>(); // Registrations
 	private BreweryStats breweryStats; // Metrics
 
-
-	@Override
-	public void onLoad() {
-		this.migrateBreweryDataFolder(); // This has to be done before Okaeri can bind
+	{
+		// Basically just racing to be the first code to execute.
+		// Okaeri configs are used in static fields, so we need this code to execute before Okaeri
+		// can start loading.
 		instance = this;
+		this.migrateBreweryDataFolder();
+		TranslationManager.newInstance(this.getDataFolder());
+	}
+
+    @Override
+	public void onLoad() {
 		MCVersion = MinecraftVersion.getIt();
 		scheduler = UniversalScheduler.getScheduler(this);
-
-		// Needs to be here otherwise BreweryX can't get the right language before Okaeri starts loading.
-		TranslationManager.newInstance(this.getDataFolder());
 	}
 
 	@Override
@@ -256,33 +259,6 @@ public final class BreweryPlugin extends JavaPlugin {
 		Logging.log("BreweryX disabled!");
 	}
 
-	private void migrateBreweryDataFolder() {
-		String pluginsFolder = getDataFolder().getParentFile().getPath();
-
-		File breweryFolder = new File(pluginsFolder + File.separator + "Brewery");
-		File breweryXFolder = new File(pluginsFolder + File.separator + "BreweryX");
-
-		if (!breweryFolder.exists() || breweryXFolder.exists()) {
-			return;
-		}
-
-		if (!breweryXFolder.exists()) {
-			breweryXFolder.mkdirs();
-		}
-
-		File[] files = breweryFolder.listFiles();
-		if (files != null) {
-			for (File file : files) {
-				try {
-					Files.copy(file.toPath(), new File(breweryXFolder, file.getName()).toPath());
-				} catch (IOException e) {
-					Logging.errorLog("Failed to move file: " + file.getName(), e);
-				}
-			}
-			Logging.log("&5Moved files from Brewery to BreweryX's data folder");
-		}
-	}
-
 
 	/**
 	 * For loading ingredients from ItemMeta.
@@ -366,4 +342,31 @@ public final class BreweryPlugin extends JavaPlugin {
 		}
 	}
 
+
+	// Lots of users migrate from the original Brewery. Because of this,
+	// we need to rename our 'Brewery' folder to 'BreweryX' ASAP. Before Okaeri loads.
+	public void migrateBreweryDataFolder() {
+		String pluginsFolder = getDataFolder().getParentFile().getPath();
+
+		File breweryFolder = new File(pluginsFolder + File.separator + "Brewery");
+		File breweryXFolder = new File(pluginsFolder + File.separator + "BreweryX");
+
+		if (breweryFolder.exists() && !breweryXFolder.exists()) {
+			if (!breweryXFolder.exists()) {
+				breweryXFolder.mkdirs();
+			}
+
+			File[] files = breweryFolder.listFiles();
+			if (files != null) {
+				for (File file : files) {
+					try {
+						Files.copy(file.toPath(), new File(breweryXFolder, file.getName()).toPath());
+					} catch (IOException e) {
+						Logging.errorLog("Failed to move file: " + file.getName(), e);
+					}
+				}
+				Logging.log("&5Moved files from Brewery to BreweryX's data folder");
+			}
+		}
+	}
 }

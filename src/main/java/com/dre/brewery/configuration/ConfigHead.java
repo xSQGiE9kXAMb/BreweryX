@@ -30,6 +30,7 @@ import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.standard.StandardSerdes;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -51,11 +52,13 @@ public class ConfigHead {
             YamlSnakeYamlConfigurer.class, new YamlSnakeYamlConfigurer()
     ));
 
+    // Should be private and use getters
     public final Map<Class<? extends AbstractOkaeriConfigFile>, AbstractOkaeriConfigFile> LOADED_CONFIGS = new HashMap<>();
-    public Path DATA_FOLDER = BreweryPlugin.getInstance().getDataFolder().toPath();
-
+    public Path DATA_FOLDER;
 
     public ConfigHead() {
+        // This sometimes loads before onLoad(), so we just get our instance straight from Bukkit instead.
+        this.DATA_FOLDER = BreweryPlugin.getInstance().getDataFolder().toPath();
     }
 
     public ConfigHead(Path dataFolder) {

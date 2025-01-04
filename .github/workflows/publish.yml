@@ -1,4 +1,4 @@
-name: 'Publish to Hangar & Modrinth with Gradle'
+name: 'Publish to Modrinth, Hangar, and Maven'
 
 on:
   release:

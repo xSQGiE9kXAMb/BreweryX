@@ -56,8 +56,6 @@ import java.util.UUID;
 @Getter
 public abstract class DataManager {
 
-    // TODO: Instead of using UUIDs for Barrels, Cauldrons, and Wakeups. We should figure out some hashing algorithm to generate a unique ID for each of them.
-
     protected static BreweryPlugin plugin = BreweryPlugin.getInstance();
     protected static long lastAutoSave = System.currentTimeMillis();
     protected static Set<ExternallyAutoSavable> autoSavabales = new HashSet<>();
