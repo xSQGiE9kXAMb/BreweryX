@@ -1,4 +1,4 @@
-name: 'Publish to Modrinth, Hangar, and Maven'
+name: 'Publish to Modrinth, Hangar, Maven, and post to Discord'
 
 on:
   release:

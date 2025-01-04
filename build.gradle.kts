@@ -36,7 +36,7 @@ plugins {
 }
 
 group = "com.dre.brewery"
-version = "3.4.6-SNAPSHOT"
+version = "3.4.6"
 val langVersion: Int = 17
 val encoding: String = "UTF-8"
 
@@ -287,7 +287,7 @@ class DiscordWebhook(
 ) {
 
     var message: String = "content"
-    var username: String = "Brewery Updates"
+    var username: String = "BreweryX Updates"
     var avatarUrl: String = "https://github.com/breweryteam.png"
     var embedTitle: String = "Embed Title"
     var embedDescription: String = "Embed Description"
