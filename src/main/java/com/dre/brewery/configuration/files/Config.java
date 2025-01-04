@@ -32,6 +32,7 @@ import com.dre.brewery.configuration.sector.capsule.ConfigDistortWord;
 import com.dre.brewery.configuration.sector.capsule.ConfigRecipe;
 import com.dre.brewery.configuration.sector.capsule.ConfiguredDataManager;
 import com.dre.brewery.storage.DataManagerType;
+import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.releases.ReleaseChecker;
 import eu.okaeri.configs.annotation.Header;
@@ -106,7 +107,10 @@ public class Config extends AbstractOkaeriConfigFile {
 	private boolean enablePuke = true;
 
 	@LocalizedComment("config.pukeItem")
-	private List<Material> pukeItem = List.of(Material.SOUL_SAND);
+	private Object pukeItem = List.of(Material.SOUL_SAND);
+	public List<Material> getPukeItem() {
+		return BUtil.getListSafely(pukeItem, Material.class);
+	}
 
 	@LocalizedComment("config.pukeDespawntime")
 	private int pukeDespawntime = 60;

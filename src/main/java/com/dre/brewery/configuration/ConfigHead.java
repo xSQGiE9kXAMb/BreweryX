@@ -30,6 +30,8 @@ import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.standard.StandardSerdes;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -37,31 +39,63 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * A class which manages the creation and retrieval of config files. This class
- * can be used as a singleton {@link ConfigManager} or as a standalone class {@link com.dre.brewery.api.addons.AddonConfigManager}.
+ * can be used as a singleton: {@link ConfigManager}, or as a standalone class: {@link com.dre.brewery.api.addons.AddonConfigManager}.
  */
 public class ConfigHead {
 
-    public final Map<Class<? extends Configurer>, Configurer> CONFIGURERS = new HashMap<>(Map.of(
-            BreweryXConfigurer.class, new BreweryXConfigurer(),
-            YamlSnakeYamlConfigurer.class, new YamlSnakeYamlConfigurer()
+    @Getter
+    private final Map<Class<? extends Configurer>, Supplier<Configurer>> configurerSupplierMap = new HashMap<>(Map.of(
+            BreweryXConfigurer.class, BreweryXConfigurer::new,
+            YamlSnakeYamlConfigurer.class, YamlSnakeYamlConfigurer::new
     ));
+    @Getter
+    private final Set<OkaeriSerdesPack> preparedSerdesPacks = new HashSet<>();
+    @Getter
+    private final Set<BidirectionalTransformer<?, ?>> preparedBiDirectionalTransformers = new HashSet<>();
 
+    // These can stay public, the fields above should be private though.
     public final Map<Class<? extends AbstractOkaeriConfigFile>, AbstractOkaeriConfigFile> LOADED_CONFIGS = new HashMap<>();
-    public Path DATA_FOLDER = BreweryPlugin.getInstance().getDataFolder().toPath();
-
+    public Path DATA_FOLDER;
 
     public ConfigHead() {
+        this.DATA_FOLDER = BreweryPlugin.getInstance().getDataFolder().toPath();
     }
 
     public ConfigHead(Path dataFolder) {
         this.DATA_FOLDER = dataFolder;
     }
 
+    /**
+     * Get a configurer from the CONFIGURERS map with all of the packs and transformers added.
+     * @param configurerClass The class of the configurer to get
+     * @return The configurer instance
+     * @param <T> The type of the configurer
+     */
+    @NotNull
+    public <T extends Configurer> T getConfigurer(Class<T> configurerClass) {
+        if (!configurerSupplierMap.containsKey(configurerClass)) {
+            Logging.errorLog("Tried to get a Configurer that doesn't exist to this ConfigHead: " + configurerClass.getCanonicalName());
+            return (T) configurerSupplierMap.get(BreweryXConfigurer.class).get();
+        }
+
+        T configurer = (T) configurerSupplierMap.get(configurerClass).get();
+        for (OkaeriSerdesPack pack : preparedSerdesPacks) {
+            configurer.register(pack);
+        }
+        for (BidirectionalTransformer<?, ?> transformer : preparedBiDirectionalTransformers) {
+            configurer.register(registry -> registry.register(transformer));
+        }
+        return configurer;
+    }
 
     /**
      * Get a config instance from the LOADED_CONFIGS map, or create a new instance if it doesn't exist
@@ -158,12 +192,7 @@ public class ConfigHead {
      */
     public <T extends AbstractOkaeriConfigFile> T createConfig(Class<T> configClass, Path file) {
         OkaeriConfigFileOptions options = getOkaeriConfigFileOptions(configClass);
-
-        Configurer configurer = CONFIGURERS.get(options.configurer());
-        if (configurer == null) {
-            Logging.errorLog("Configurer cannot be null. Make sure you've registered the configurer before trying to use it!");
-            configurer = CONFIGURERS.get(BreweryXConfigurer.class);
-        }
+        Configurer configurer = this.getConfigurer(options.configurer());
 
         return createConfig(configClass, file, configurer, new StandardSerdes(), options.update(), options.removeOrphans());
     }
@@ -199,11 +228,7 @@ public class ConfigHead {
      * @param packs The array of OkaeriSerdesPack instances to be added to the configurers.
      */
     public void addSerdesPacks(OkaeriSerdesPack... packs) {
-        CONFIGURERS.values().forEach(configurer -> {
-            for (OkaeriSerdesPack pack : packs) {
-                configurer.register(pack);
-            }
-        });
+        preparedSerdesPacks.addAll(Arrays.asList(packs));
     }
 
     /**
@@ -213,11 +238,7 @@ public class ConfigHead {
      * @param transformers The array of BidirectionalTransformer instances to be added to the configurers.
      */
     public void addBidirectionalTransformers(BidirectionalTransformer<?, ?>... transformers) {
-        CONFIGURERS.values().forEach(configurer ->  {
-            for (BidirectionalTransformer<?, ?> transformer : transformers) {
-                configurer.register(registry -> registry.register(transformer));
-            }
-        });
+        preparedBiDirectionalTransformers.addAll(Arrays.asList(transformers));
     }
 
     /**
@@ -227,7 +248,7 @@ public class ConfigHead {
      * @param configurer The Configurer instance to be added.
      */
     public void addConfigurer(Configurer configurer) {
-        CONFIGURERS.put(configurer.getClass(), configurer);
+        configurerSupplierMap.put(configurer.getClass(), () -> configurer);
     }
 
     // Util

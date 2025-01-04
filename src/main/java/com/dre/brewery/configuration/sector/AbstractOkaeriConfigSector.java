@@ -65,7 +65,7 @@ public abstract class AbstractOkaeriConfigSector<T extends OkaeriConfig> extends
     // Helper method to get the type of T
     private Class<?> getTypeOfT() {
         // Check the generic type of the superclass
-        // For example, OkaeriConfigSector<ConfigRecipe> would give us String as the type
+        // For example, OkaeriConfigSector<ConfigRecipe> would give us ConfigRecipe as the type
         ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
         return (Class<?>) parameterizedType.getActualTypeArguments()[0];
     }
