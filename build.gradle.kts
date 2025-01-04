@@ -162,7 +162,8 @@ tasks {
     register("publishRelease") {
         println("Publishing a new release to: modrinth, hangar, and maven")
         dependsOn(modrinth)
-        finalizedBy(hangarPublish)
+        finalizedBy("publishPluginPublicationToHangar")
+        //finalizedBy(hangarPublish)
         finalizedBy(publish)
 
         doLast {
