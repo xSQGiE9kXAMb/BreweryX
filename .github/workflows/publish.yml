@@ -29,5 +29,6 @@ jobs:
           HANGAR_TOKEN: ${{ secrets.HANGAR_TOKEN }}
           REPO_USERNAME: ${{ secrets.REPO_USERNAME }}
           REPO_SECRET: ${{ secrets.REPO_SECRET }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
           arguments: publishRelease --stacktrace

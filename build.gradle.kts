@@ -169,8 +169,11 @@ tasks {
             // Much rather use a task in Gradle than a GitHub action for this,
             // but, may want to look into finding a small plugin for this since BreweryX has
             // a variety of addons that would also need this code copied into them.
-            val webhook = DiscordWebhook(System.getenv("DISCORD_WEBHOOK") ?: return@doLast)
-            webhook.message = "A new version of BreweryX has been released!"
+            val webhook = DiscordWebhook(System.getenv("DISCORD_WEBHOOK") ?: run {
+                println("No Discord Webhook found, skipping Discord announcement.")
+                return@doLast
+            })
+            webhook.message = "@everyone"
             webhook.embedTitle = "BreweryX - v${project.version}"
             webhook.embedDescription = readChangeLog()
             webhook.send()
@@ -223,7 +226,10 @@ publishing {
 
 
 modrinth {
-    token.set(System.getenv("MODRINTH_TOKEN"))
+    token.set(System.getenv("MODRINTH_TOKEN") ?: run {
+        println("No Modrinth API key found, skipping Modrinth publication.")
+        return@modrinth
+    })
     projectId.set(project.name) // This can be the project ID or the slug. Either will work!
     versionNumber.set(project.version.toString())
     versionType.set("release") // This is the default -- can also be `beta` or `alpha`
@@ -240,12 +246,14 @@ hangarPublish {
         version.set(project.version.toString())
         channel.set("Release")
         id.set(project.name)
-        apiKey.set(System.getenv("HANGAR_TOKEN"))
+        apiKey.set(System.getenv("HANGAR_TOKEN") ?: run {
+            println("No Hangar API key found, skipping Hangar publication.")
+            return@register
+        })
         platforms {
             register(Platforms.PAPER) {
-                // TODO: Swap jar with modrinth release link
-                //url.set("https://modrinth.com/plugin/breweryx/versions")
-                jar.set(tasks.shadowJar.flatMap { it.archiveFile })
+                url.set("https://modrinth.com/plugin/breweryx/versions")
+                //jar.set(tasks.shadowJar.flatMap { it.archiveFile })
                 platformVersions.set(listOf("1.13.x", "1.14.x", "1.15.x", "1.16.x", "1.17.x", "1.18.x", "1.19.x", "1.20.x", "1.21.x"))
             }
         }

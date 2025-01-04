@@ -92,23 +92,21 @@ public final class BreweryPlugin extends JavaPlugin {
 		// can start loading.
 		instance = this;
 		this.migrateBreweryDataFolder();
+		MCVersion = MinecraftVersion.getIt();
+		scheduler = UniversalScheduler.getScheduler(this);
 		TranslationManager.newInstance(this.getDataFolder());
 	}
 
     @Override
 	public void onLoad() {
-		MCVersion = MinecraftVersion.getIt();
-		scheduler = UniversalScheduler.getScheduler(this);
+		if (getMCVersion().isOrLater(MinecraftVersion.V1_14)) {
+			// Campfires are weird. Initialize once now, so it doesn't lag later when we check for campfires under Cauldrons
+			getServer().createBlockData(Material.CAMPFIRE);
+		}
 	}
 
 	@Override
 	public void onEnable() {
-		if (getMCVersion().isOrLater(MinecraftVersion.V1_14)) {
-			// Campfires are weird, Initialize once now so it doesn't lag later when we check for campfires under Cauldrons
-			getServer().createBlockData(Material.CAMPFIRE);
-		}
-
-
 		// Register Item Loaders
 		CustomItem.registerItemLoader(this);
 		SimpleItem.registerItemLoader(this);
