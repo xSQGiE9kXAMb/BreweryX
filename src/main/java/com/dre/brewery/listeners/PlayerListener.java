@@ -105,10 +105,13 @@ public class PlayerListener implements Listener {
 			return;
 		}
 
-		if (player.isSneaking()) return;
+		Material heldItem = event.getItem() != null ? event.getItem().getType() : null;
+		if (player.isSneaking() && !BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, heldItem)) {
+			return;
+		}
 
 		// -- Interacting with a Cauldron --
-		if (MaterialUtil.isWaterCauldron(type)) {
+		if (MaterialUtil.isWaterCauldron(type) && !player.isSneaking()) {
 			// Handle the Cauldron Interact
 			// The Event might get cancelled in here
 			BCauldron.clickCauldron(event);

@@ -36,7 +36,7 @@ plugins {
 }
 
 group = "com.dre.brewery"
-version = "3.4.6"
+version = "3.4.7"
 val langVersion: Int = 17
 val encoding: String = "UTF-8"
 
@@ -163,17 +163,13 @@ tasks {
         println("Publishing a new release to: modrinth, hangar, and maven")
         dependsOn(modrinth)
         finalizedBy("publishPluginPublicationToHangar")
-        //finalizedBy(hangarPublish)
         finalizedBy(publish)
 
         doLast {
             // Much rather use a task in Gradle than a GitHub action for this,
             // but, may want to look into finding a small plugin for this since BreweryX has
             // a variety of addons that would also need this code copied into them.
-            val webhook = DiscordWebhook(System.getenv("DISCORD_WEBHOOK") ?: run {
-                println("No Discord Webhook found, skipping Discord announcement.")
-                return@doLast
-            })
+            val webhook = DiscordWebhook(System.getenv("DISCORD_WEBHOOK") ?: return@doLast)
             webhook.message = "@everyone"
             webhook.embedTitle = "BreweryX - v${project.version}"
             webhook.embedDescription = readChangeLog()
@@ -185,6 +181,7 @@ tasks {
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(langVersion)
+    //withSourcesJar() -> Add conditional for this
 }
 
 
@@ -228,7 +225,6 @@ publishing {
 
 modrinth {
     token.set(System.getenv("MODRINTH_TOKEN") ?: run {
-        println("No Modrinth API key found, skipping Modrinth publication.")
         return@modrinth
     })
     projectId.set(project.name) // This can be the project ID or the slug. Either will work!
@@ -247,18 +243,15 @@ hangarPublish {
         version.set(project.version.toString())
         channel.set("Release")
         id.set(project.name)
-        apiKey.set(System.getenv("HANGAR_TOKEN") ?: run {
-            println("No Hangar API key found, skipping Hangar publication.")
-            return@register
-        })
+        apiKey.set(System.getenv("HANGAR_TOKEN") ?: return@register)
+        changelog.set(readChangeLog())
         platforms {
             register(Platforms.PAPER) {
+                // TODO: Ask in paper discord
                 url.set("https://modrinth.com/plugin/breweryx/versions")
-                //jar.set(tasks.shadowJar.flatMap { it.archiveFile })
                 platformVersions.set(listOf("1.13.x", "1.14.x", "1.15.x", "1.16.x", "1.17.x", "1.18.x", "1.19.x", "1.20.x", "1.21.x"))
             }
         }
-        changelog.set(readChangeLog())
     }
 }
 

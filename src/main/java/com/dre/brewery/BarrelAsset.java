@@ -52,6 +52,9 @@ public enum BarrelAsset {
 	}
 
 	public static boolean isBarrelAsset(BarrelAsset assetType, Material material) {
+		if (material == null) {
+			return false;
+		}
 		return BARREL_ASSET_LIST_MAP.get(assetType).contains(material);
 	}
 }
