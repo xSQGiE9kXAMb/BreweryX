@@ -294,9 +294,11 @@ public class BrewLore {
 	}
 
 	public void updateAlc(boolean inDistiller) {
-		if (!brew.isUnlabeled() && (inDistiller || config.isAlwaysShowAlc()) && (!brew.hasRecipe() || brew.getCurrentRecipe().getAlcohol() != 0)) {
-			int alc = brew.getOrCalcAlc();
+		int alc = brew.getOrCalcAlc();
+		if (!brew.isUnlabeled() && (inDistiller || config.isAlwaysShowAlc()) && alc != 0) {
 			addOrReplaceLore(Type.ALC, "§8", lang.getEntry("Brew_Alc", alc + ""));
+		} else if (config.isAlwaysShowAlcIndicator() && alc > 0) {
+			addOrReplaceLore(Type.ALC, "§8", lang.getEntry("Brew_Alcoholic"));
 		} else {
 			removeLore(Type.ALC);
 		}

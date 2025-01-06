@@ -18,6 +18,7 @@ Brew_Years: Years
 Brew_fermented: fermented
 Brew_minute: minute
 Brew_Alc: Alc &v1ml
+Brew_Alcoholic: Alcoholic
 Brew_Brewer: 'Brewer: &v1'
 
 # CMD
