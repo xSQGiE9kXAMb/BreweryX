@@ -339,9 +339,9 @@ public abstract class DataManager {
         }
 
         if (yawPitch && loc.length == 6) {
-            return new Location(world, BUtil.parseInt(loc[1]), BUtil.parseInt(loc[2]), BUtil.parseInt(loc[3]), BUtil.parseFloat(loc[4]), BUtil.parseFloat(loc[5]));
+            return new Location(world, Integer.parseInt(loc[1]), Integer.parseInt(loc[2]), Integer.parseInt(loc[3]), Float.parseFloat(loc[4]), Float.parseFloat(loc[5]));
         } else {
-            return new Location(world, BUtil.parseInt(loc[1]), BUtil.parseInt(loc[2]), BUtil.parseInt(loc[3]));
+            return new Location(world, Integer.parseInt(loc[1]), Integer.parseInt(loc[2]), Integer.parseInt(loc[3]));
         }
     }
 

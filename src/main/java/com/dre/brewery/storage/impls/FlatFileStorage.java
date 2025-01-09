@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -186,13 +187,19 @@ public class FlatFileStorage extends DataManager {
         if (spigotLoc == null) {
             return null;
         }
-        BoundingBox bounds = BoundingBox.fromPoints(dataFile.getIntegerList(path + ".bounds"));
+
+        List<Integer> bounds = Arrays.stream(
+                dataFile.getString(path + ".bounds").split(",")
+            )
+            .map(Integer::parseInt).toList();
+
+        BoundingBox boundingBox = BoundingBox.fromPoints(bounds);
         float time = (float) dataFile.getDouble(path + ".time", 0.0);
         byte sign = (byte) dataFile.getInt(path + ".sign", 0);
         ItemStack[] items = BukkitSerialization.itemStackArrayFromBase64(dataFile.getString(path + ".items", null));
 
 
-        return new Barrel(spigotLoc.getBlock(), sign, bounds, items, time, id);
+        return new Barrel(spigotLoc.getBlock(), sign, boundingBox, items, time, id);
     }
 
     @Override
