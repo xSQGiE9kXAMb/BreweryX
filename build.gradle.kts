@@ -58,7 +58,7 @@ repositories {
     maven("https://repo.glaremasters.me/repository/towny/") // Towny
     maven("https://repo.oraxen.com/releases") // Oraxen
     maven("https://storehouse.okaeri.eu/repository/maven-public/") // Okaeri Config
-    maven("https://papermc.io/repo/repository/maven-public/") // PaperLib
+    maven("https://repo.papermc.io/repository/maven-public/") // PaperLib
 }
 
 dependencies {
