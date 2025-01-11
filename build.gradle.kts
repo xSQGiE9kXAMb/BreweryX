@@ -75,7 +75,7 @@ dependencies {
     // For proper scheduling between Bukkit-Folia like servers, https://github.com/Anon8281/UniversalScheduler
     implementation("com.github.Anon8281:UniversalScheduler:0.1.3-dev")
     // Nice annotations, I prefer these to Lombok's, https://www.jetbrains.com/help/idea/annotating-source-code.html
-    implementation("org.jetbrains:annotations:16.0.2")
+    compileOnly("org.jetbrains:annotations:26.0.1")
     // MongoDB & log4j to suppress MongoDB's logger
     implementation("org.mongodb:mongodb-driver-sync:5.3.0-beta0")
     compileOnly("org.apache.logging.log4j:log4j-core:2.23.1")
