@@ -36,6 +36,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -475,32 +476,14 @@ public final class BUtil {
         return worldName;
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void saveFile(InputStream in, File dest, String name, boolean overwrite) throws IOException {
-        if (in == null) return;
-        if (!dest.exists()) {
-            dest.mkdirs();
-        }
-        File result = new File(dest, name);
-        if (result.exists()) {
-            if (overwrite) {
-                result.delete();
-            } else {
-                return;
-            }
-        }
+    public static int getItemDespawnRate(World world) {
+        YamlConfiguration spigotConfig = Bukkit.spigot().getConfig();
 
-        OutputStream out = new FileOutputStream(result);
-        byte[] buffer = new byte[1024];
-
-        int length;
-        //copy the file content in bytes
-        while ((length = in.read(buffer)) > 0) {
-            out.write(buffer, 0, length);
+        int worldDespawnRate = spigotConfig.getInt("world-settings." + world.getName() + ".item-despawn-rate", -1);
+        if (worldDespawnRate < 0) {
+            return spigotConfig.getInt("world-settings.default.item-despawn-rate", 6000);
         }
-
-        in.close();
-        out.close();
+        return worldDespawnRate;
     }
 
 
