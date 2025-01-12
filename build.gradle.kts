@@ -37,7 +37,7 @@ plugins {
 }
 
 group = "com.dre.brewery"
-version = "3.4.8-SNAPSHOT"
+version = "3.4.8"
 val langVersion: Int = 17
 val encoding: String = "UTF-8"
 
@@ -194,7 +194,10 @@ tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(langVersion)
-    //withSourcesJar() -> Add conditional for this
+    val b = System.getProperty("sources")
+    if (b != null && b.toBoolean()) {
+        withSourcesJar()
+    }
 }
 
 
