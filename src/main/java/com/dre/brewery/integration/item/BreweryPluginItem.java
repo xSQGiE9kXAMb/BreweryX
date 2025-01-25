@@ -21,6 +21,7 @@
 package com.dre.brewery.integration.item;
 
 import com.dre.brewery.Brew;
+import com.dre.brewery.recipe.BCauldronRecipe;
 import com.dre.brewery.recipe.BRecipe;
 import com.dre.brewery.recipe.PluginItem;
 import org.bukkit.inventory.ItemStack;
@@ -36,6 +37,10 @@ public class BreweryPluginItem extends PluginItem {
 
     @Override
     public boolean matches(ItemStack item) {
+        return isBrew(item) || isCauldronIngredient(item);
+    }
+
+    private boolean isBrew(ItemStack item) {
         Brew brew = Brew.get(item);
         if (brew == null) {
             return false;
@@ -43,6 +48,16 @@ public class BreweryPluginItem extends PluginItem {
 
         BRecipe recipe = brew.getCurrentRecipe();
         if (recipe != null) {
+            // We *could* add support for names instead of just using the ids
+            return this.getItemId().equalsIgnoreCase(recipe.getId());
+        }
+        return false;
+    }
+
+    private boolean isCauldronIngredient(ItemStack item) {
+        BCauldronRecipe recipe = BCauldronRecipe.get(item);
+        if (recipe != null) {
+            // We *could* add support for names instead of just using the ids
             return this.getItemId().equalsIgnoreCase(recipe.getId());
         }
         return false;
