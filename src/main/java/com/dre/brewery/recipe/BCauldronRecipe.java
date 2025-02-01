@@ -29,7 +29,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -236,15 +235,6 @@ public class BCauldronRecipe {
         return null;
     }
 
-    @Nullable
-    public static BCauldronRecipe get(ItemStack item) {
-        return recipes.stream()
-            .filter(recipe -> recipe.getIngredients()
-                .stream()
-                .anyMatch(ingredient -> ingredient.matches(item)))
-            .findFirst()
-            .orElse(null);
-    }
 
     /**
      * Gets a Modifiable Sublist of the CauldronRecipes that are loaded by config.
