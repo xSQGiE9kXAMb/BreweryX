@@ -37,14 +37,15 @@ public class BreweryPluginItem extends PluginItem {
 
     @Override
     public boolean matches(ItemStack item) {
-        return isBrew(item) || isCauldronIngredient(item);
-    }
-
-    private boolean isBrew(ItemStack item) {
         Brew brew = Brew.get(item);
         if (brew == null) {
             return false;
         }
+        return isBrew(brew, item) || isCauldronIngredient(item);
+    }
+
+    private boolean isBrew(Brew brew, ItemStack item) {
+
 
         BRecipe recipe = brew.getCurrentRecipe();
         if (recipe != null) {
