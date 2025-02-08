@@ -178,6 +178,7 @@ public class Config extends AbstractOkaeriConfigFile {
     private boolean useLWC = true;
     private boolean useGriefPrevention = true;
     private boolean useTowny = true;
+    private boolean useLands = true;
     private boolean useBlockLocker = true;
     private boolean useGMInventories = true;
 
