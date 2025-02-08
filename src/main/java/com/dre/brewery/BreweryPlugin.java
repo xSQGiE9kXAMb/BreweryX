@@ -104,8 +104,6 @@ public final class BreweryPlugin extends JavaPlugin {
             // Campfires are weird. Initialize once now, so it doesn't lag later when we check for campfires under Cauldrons
             getServer().createBlockData(Material.CAMPFIRE);
         }
-
-        // FIXME: This should not be needed. Why is it needed? Why can't it just load itself?
         if (getServer().getPluginManager().getPlugin("Lands") != null) LandsHook.load();
     }
 
