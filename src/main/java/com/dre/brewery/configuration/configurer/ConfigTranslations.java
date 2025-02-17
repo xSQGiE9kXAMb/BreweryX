@@ -39,7 +39,7 @@ public class ConfigTranslations {
     public ConfigTranslations(Translation activeTranslation, Yaml yamlInstance) {
         try (InputStream inputStream = this.getClass()
             .getClassLoader()
-            .getResourceAsStream("config-langs/" + activeTranslation.getFilename())) {
+            .getResourceAsStream("config-langs/" + activeTranslation.fileName())) {
 
             translations = yamlInstance.load(inputStream);
         } catch (IOException e) {
