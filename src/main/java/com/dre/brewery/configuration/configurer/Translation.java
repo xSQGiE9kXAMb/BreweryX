@@ -32,15 +32,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * List of the available translation<br />
- * Should we even use an enum here?<br />
- * <br />
- * The comments can be found under {@code langs/LANGUAGE.yml}
- */
 public record Translation(String fileName) {
 
-    // Languages added should have a config and a lang translation (resources/config-langs/, resources/languages/)
+    // Languages added should have a language translation, and may have a config translation
 
     public static final Translation EN = new Translation("en.yml");
     private static final List<Translation> DEFAULT_TRANSLATIONS = compileTranslations();
