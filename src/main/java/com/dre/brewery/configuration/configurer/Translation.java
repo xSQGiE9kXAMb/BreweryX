@@ -31,7 +31,6 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Stream;
 
 /**
  * List of the available translation<br />
@@ -55,25 +54,31 @@ public record Translation(String fileName) {
     }
 
     private static List<Translation> compileTranslations() {
-        Stream<String> languageFiles;
         try {
-            URI uri = Translation.class.getResource("/resources").toURI();
+            URI uri = Translation.class.getResource("/languages").toURI();
             Path myPath;
             if (uri.getScheme().equals("jar")) {
                 try (FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
-                    myPath = fileSystem.getPath("/resources");
-                    languageFiles = Files.walk(myPath, 1).map(Path::getFileName).map(Path::toString);
+                    myPath = fileSystem.getPath("/languages");
+                    return Files.walk(myPath, 1)
+                        .map(Path::getFileName)
+                        .map(Path::toString)
+                        .filter(filename -> filename.endsWith(".yml"))
+                        .map(Translation::new)
+                        .toList();
                 }
             } else {
                 myPath = Paths.get(uri);
-                languageFiles = Files.walk(myPath, 1).map(Path::getFileName).map(Path::toString);
+                return Files.walk(myPath, 1)
+                    .map(Path::getFileName)
+                    .map(Path::toString)
+                    .filter(filename -> filename.endsWith(".yml"))
+                    .map(Translation::new)
+                    .toList();
             }
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
-        return languageFiles
-            .filter(filename -> filename.endsWith(".yml"))
-            .map(Translation::new)
-            .toList();
+
     }
 }

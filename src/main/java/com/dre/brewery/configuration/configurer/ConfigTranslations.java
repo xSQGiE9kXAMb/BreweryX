@@ -37,11 +37,18 @@ public class ConfigTranslations {
     }
 
     public ConfigTranslations(Translation activeTranslation, Yaml yamlInstance) {
-        try (InputStream inputStream = this.getClass()
-            .getClassLoader()
-            .getResourceAsStream("config-langs/" + activeTranslation.fileName())) {
-
-            translations = yamlInstance.load(inputStream);
+        try (InputStream inputStream = ConfigTranslations.class
+            .getResourceAsStream("/config-langs/" + activeTranslation.fileName())) {
+            if (inputStream != null) {
+                translations = yamlInstance.load(inputStream);
+                return;
+            }
+            try (InputStream defaultInputStream = ConfigTranslations.class.getResourceAsStream("/config-langs/" + Translation.EN.fileName())) {
+                if (defaultInputStream == null) {
+                    throw new IOException("Couldn't find default translation file");
+                }
+                translations = yamlInstance.load(defaultInputStream);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
