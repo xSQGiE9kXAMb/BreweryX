@@ -31,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 public record Translation(String fileName) {
 
@@ -54,25 +55,25 @@ public record Translation(String fileName) {
             if (uri.getScheme().equals("jar")) {
                 try (FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
                     myPath = fileSystem.getPath("/languages");
-                    return Files.walk(myPath, 1)
-                        .map(Path::getFileName)
-                        .map(Path::toString)
-                        .filter(filename -> filename.endsWith(".yml"))
-                        .map(Translation::new)
-                        .toList();
+                    return fromPaths(Files.walk(myPath, 1));
                 }
             } else {
                 myPath = Paths.get(uri);
-                return Files.walk(myPath, 1)
-                    .map(Path::getFileName)
-                    .map(Path::toString)
-                    .filter(filename -> filename.endsWith(".yml"))
-                    .map(Translation::new)
-                    .toList();
+                return fromPaths(Files.walk(myPath, 1));
+
             }
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public static List<Translation> fromPaths(Stream<Path> pathStream) {
+        return pathStream
+            .map(Path::getFileName)
+            .map(Path::toString)
+            .filter(filename -> filename.endsWith(".yml"))
+            .map(Translation::new)
+            .toList();
     }
 }
