@@ -44,6 +44,7 @@ public class ConfigTranslations {
                 return;
             }
             try (InputStream defaultInputStream = ConfigTranslations.class.getResourceAsStream("/config-langs/" + Translation.EN.fileName())) {
+                Logging.log("Could not find config translation, using default: ");
                 if (defaultInputStream == null) {
                     throw new IOException("Couldn't find default translation file");
                 }
