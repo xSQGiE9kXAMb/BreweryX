@@ -25,7 +25,6 @@ import com.dre.brewery.configuration.ConfigHead;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
-import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
@@ -71,6 +70,13 @@ public class TranslationManager {
         } catch (IOException e) {
             Logging.debugLog("Error reading YAML file: " + e.getMessage());
         }
+        File languageFile = new File(dataFolder, "languages/" + activeTranslation.fileName());
+        if (TranslationManager.class.getResource("/languages/" + activeTranslation.fileName()) == null && !languageFile.exists()) {
+            Logging.errorLog("Translation could not be found internally or as a file externally: " + activeTranslation.fileName());
+            Logging.errorLog("You need to either change translation or provide one at: " + languageFile);
+            throw new IllegalStateException("Language file not found: languages/" + activeTranslation.fileName());
+        }
+
 
         this.translations = new ConfigTranslations(activeTranslation, yaml);
         this.fallbackTranslations = new ConfigTranslations(fallbackTranslation, yaml);
@@ -101,7 +107,11 @@ public class TranslationManager {
     }
 
     public void createLanguageFile(Translation translation) {
-        ConfigManager.createFileFromResources("languages/" + translation.fileName(), dataFolder.toPath().resolve("languages").resolve(translation.fileName()));
+        Path languageFile = dataFolder.toPath().resolve("languages").resolve(translation.fileName());
+        if (!Files.exists(languageFile) && TranslationManager.class.getResource("/languages/" + translation.fileName()) == null) {
+            throw new IllegalStateException("Translation could not be found internally or as a file externally: " + translation);
+        }
+        ConfigManager.createFileFromResources("languages/" + translation.fileName(), languageFile);
     }
 
     // Okaeri would do this normally, but since default values in Lang changes based on language,
@@ -128,6 +138,7 @@ public class TranslationManager {
             }
             langFromFile.save();
         }
+
     }
 
     // Loads a lang from resources... by loading from file then overwriting with resources InputStream
@@ -137,8 +148,11 @@ public class TranslationManager {
         String langFilePathStr = "languages/" + translation.fileName();
         Path langFilePath = dataFolder.toPath().resolve(langFilePathStr);
 
-        Lang langFromResources = tempHead.createConfig(Lang.class, langFilePath);
-        try (InputStream inputStream = BreweryPlugin.class.getClassLoader().getResourceAsStream(langFilePathStr)) {
+        try (InputStream inputStream = BreweryPlugin.class.getResourceAsStream("/" + langFilePathStr)) {
+            if (inputStream == null || !Files.exists(langFilePath)) {
+                throw new IOException("Lang file not found: " + langFilePathStr);
+            }
+            Lang langFromResources = tempHead.createConfig(Lang.class, langFilePath);
             langFromResources.load(inputStream);
             return langFromResources;
         } catch (IOException e) {
