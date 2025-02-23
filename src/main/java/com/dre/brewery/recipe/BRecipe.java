@@ -740,15 +740,6 @@ public class BRecipe implements Cloneable {
     }
 
 
-    public String[] getName() {
-        return name;
-    }
-
-    public boolean isGlint() {
-        return glint;
-    }
-
-
     /**
      * Get the BRecipe that has the given name as one of its quality names.
      */
