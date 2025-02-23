@@ -41,10 +41,10 @@ public class BreweryPluginItem extends PluginItem {
         if (brew == null) {
             return false;
         }
-        return isBrew(brew, item) || isCauldronIngredient(item);
+        return isBrew(brew) || isCauldronIngredient(item);
     }
 
-    private boolean isBrew(Brew brew, ItemStack item) {
+    private boolean isBrew(Brew brew) {
 
 
         BRecipe recipe = brew.getCurrentRecipe();
