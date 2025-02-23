@@ -35,6 +35,7 @@ import com.dre.brewery.recipe.RecipeItem;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
@@ -55,6 +56,7 @@ import java.util.List;
 /**
  * Represents ingredients in Cauldron, Brew
  */
+@Getter
 public class BIngredients {
 
     private static final MinecraftVersion VERSION = BreweryPlugin.getMCVersion();
@@ -238,10 +240,6 @@ public class BIngredients {
         return ingredients;
     }
 
-    public int getCookedTime() {
-        return cookedTime;
-    }
-
     /**
      * best recipe for current state of potion, STILL not always returns the correct one...
      */
@@ -252,6 +250,7 @@ public class BIngredients {
         int woodQuality;
         int ageQuality;
         BRecipe bestRecipe = null;
+        // FIXME: This should include BCauldronRecipes too. (Proper parent class needed!)
         for (BRecipe recipe : BRecipe.getAllRecipes()) {
             ingredientQuality = getIngredientQuality(recipe);
             cookingQuality = getCookingQuality(recipe, distilled);
