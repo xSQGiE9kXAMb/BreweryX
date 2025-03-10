@@ -54,6 +54,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 public final class BUtil {
 
@@ -512,6 +513,12 @@ public final class BUtil {
         return worldName;
     }
 
+    public static List<String> numberRange(int startInclusive, int stopInclusive) {
+        return IntStream.range(startInclusive, stopInclusive + 1)
+            .mapToObj(String::valueOf)
+            .toList();
+    }
+
     public static int getRandomIntInRange(String string) {
         if (string == null) {
             return 0;
@@ -534,6 +541,15 @@ public final class BUtil {
         }
 
         return 0;
+    }
+
+    public static boolean isInt(String string) {
+        try {
+            Integer.parseInt(string);
+            return true;
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
     }
 
     public static int parseIntOrZero(String string) {

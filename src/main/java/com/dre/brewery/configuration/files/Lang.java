@@ -224,6 +224,10 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String cmdDrinkOther;
     @CustomKey("CMD_Set")
     private String cmdSet;
+    @CustomKey("CMD_Invalid_Option")
+    private String cmdInvalidOption;
+    @CustomKey("CMD_DuplicateOption")
+    private String cmdDuplicateOption;
     @CustomKey("CMD_Invalid_Cook_Time")
     private String cmdInvalidCookTime;
     @CustomKey("CMD_Invalid_Distill_Runs")
@@ -232,6 +236,10 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String cmdInvalidWoodType;
     @CustomKey("CMD_Invalid_Age_Time")
     private String cmdInvalidAgeTime;
+    @CustomKey("CMD_Ingredient")
+    private String cmdIngredient;
+    @CustomKey("CMD_Invalid_Ingredient")
+    private String cmdInvalidIngredient;
     @CustomKey("CMD_Cannot_Distill")
     private String cmdCannotDistill;
     @CustomKey("CMD_Distill_Ruined")
@@ -301,6 +309,16 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String helpGive;
     @CustomKey("Help_Simulate")
     private String helpSimulate;
+    @CustomKey("Help_Simulate_Options")
+    private String helpSimulateOptions;
+    @CustomKey("Help_Simulate_Distill")
+    private String helpSimulateDistill;
+    @CustomKey("Help_Simulate_Age")
+    private String helpSimulateAge;
+    @CustomKey("Help_Simulate_Brewer")
+    private String helpSimulateBrewer;
+    @CustomKey("Help_Simulate_Player")
+    private String helpSimulatePlayer;
     @CustomKey("Help_Delete")
     private String helpDelete;
     @CustomKey("Help_Help")
