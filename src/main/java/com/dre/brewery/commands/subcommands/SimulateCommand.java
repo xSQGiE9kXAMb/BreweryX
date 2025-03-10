@@ -74,7 +74,6 @@ public class SimulateCommand implements SubCommand {
             String arg = args[currentArgIdx];
 
             Status status = parser.parse(arg);
-            currentArgIdx++;
             if (status instanceof Status.Help) {
                 sendUsage(lang, sender);
                 return;
@@ -84,12 +83,9 @@ public class SimulateCommand implements SubCommand {
             } else if (status instanceof Status.Error error) {
                 lang.sendEntry(sender, error.errorType().getTranslationKey(), arg);
                 return;
-            } // else Status.Updated, keep going
-        }
-
-        if (currentArgIdx >= args.length) {
-            sendUsage(lang, sender);
-            return;
+            } else {
+                currentArgIdx++;
+            }
         }
 
         String ingredientsStr = Arrays.stream(args, currentArgIdx, args.length)
@@ -192,14 +188,15 @@ public class SimulateCommand implements SubCommand {
             String arg = args[currentArgIdx];
 
             Status status = parser.parse(arg);
-            currentArgIdx++;
             if (status instanceof Status.Help) {
                 return List.of();
             } else if (status instanceof Status.Finished) {
                 break;
             } else if (status instanceof Status.Error) {
                 return List.of();
-            } // else Status.Updated, keep going
+            } else {
+                currentArgIdx++;
+            }
         }
 
         return StringUtil.copyPartialMatches(lastArg, getIngredientCompletions(), new ArrayList<>());
