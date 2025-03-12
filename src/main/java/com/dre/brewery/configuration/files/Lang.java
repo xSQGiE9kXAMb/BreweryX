@@ -224,6 +224,12 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String cmdDrinkOther;
     @CustomKey("CMD_Set")
     private String cmdSet;
+    @CustomKey("CMD_Distilled")
+    private String cmdDistilled;
+    @CustomKey("CMD_Aged")
+    private String cmdAged;
+    @CustomKey("CMD_Simulated")
+    private String cmdSimulated;
     @CustomKey("CMD_Invalid_Option")
     private String cmdInvalidOption;
     @CustomKey("CMD_DuplicateOption")
@@ -246,8 +252,6 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String cmdDistillRuined;
     @CustomKey("CMD_Age_Ruined")
     private String cmdAgeRuined;
-    @CustomKey("CMD_Simulated")
-    private String cmdSimulated;
 
 
     @Comment("Error")
@@ -319,6 +323,10 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String helpSimulateBrewer;
     @CustomKey("Help_Simulate_Player")
     private String helpSimulatePlayer;
+    @CustomKey("Help_Distill")
+    private String helpDistill;
+    @CustomKey("Help_Age")
+    private String helpAge;
     @CustomKey("Help_Delete")
     private String helpDelete;
     @CustomKey("Help_Help")

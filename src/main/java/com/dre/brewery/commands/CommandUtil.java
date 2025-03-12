@@ -183,6 +183,8 @@ public class CommandUtil {
         if (CREATE.checkCached(sender)) {
             cmds.add(lang.getEntry("Help_Create"));
             cmds.add(lang.getEntry("Help_Give"));
+            cmds.add(lang.getEntry("Help_Distill"));
+            cmds.add(lang.getEntry("Help_Age"));
             cmds.add(lang.getEntry("Help_Simulate"));
         }
 

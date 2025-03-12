@@ -50,16 +50,6 @@ import java.util.stream.Stream;
 
 public class SimulateCommand implements SubCommand {
 
-    private void sendUsage(Lang lang, CommandSender sender) {
-        lang.sendEntry(sender, "Etc_Usage");
-        lang.sendEntry(sender, "Help_Simulate");
-        lang.sendEntry(sender, "Help_Simulate_Options");
-        lang.sendEntry(sender, "Help_Simulate_Distill");
-        lang.sendEntry(sender, "Help_Simulate_Age");
-        lang.sendEntry(sender, "Help_Simulate_Brewer");
-        lang.sendEntry(sender, "Help_Simulate_Player");
-    }
-
     @Override
     public void execute(BreweryPlugin breweryPlugin, Lang lang, CommandSender sender, String label, String[] args) {
         SimulationParameters simulationParameters;
@@ -108,6 +98,16 @@ public class SimulateCommand implements SubCommand {
         List<RecipeItem> itemList = ((BRecipe.IngredientsResult.Success) result).ingredients();
 
         simulate(lang, sender, simulationParameters, itemList);
+    }
+
+    private static void sendUsage(Lang lang, CommandSender sender) {
+        lang.sendEntry(sender, "Etc_Usage");
+        lang.sendEntry(sender, "Help_Simulate");
+        lang.sendEntry(sender, "Help_Simulate_Options");
+        lang.sendEntry(sender, "Help_Simulate_Distill");
+        lang.sendEntry(sender, "Help_Simulate_Age");
+        lang.sendEntry(sender, "Help_Simulate_Brewer");
+        lang.sendEntry(sender, "Help_Simulate_Player");
     }
 
     private static void simulate(Lang lang, CommandSender sender, SimulationParameters simulation, List<RecipeItem> itemList) {
@@ -342,13 +342,9 @@ public class SimulateCommand implements SubCommand {
                     yield completions;
                 }
                 case DISTILL -> BUtil.numberRange(1, 10);
-                case WOOD -> Arrays.stream(BarrelWoodType.values())
-                    .filter(BarrelWoodType::isSpecific)
-                    .map(BarrelWoodType::getFormattedName)
-                    .toList();
+                case WOOD -> BarrelWoodType.TAB_COMPLETIONS;
                 case AGE -> BUtil.numberRange(1, 50);
-                case BREWER -> null;
-                case PLAYER -> null;
+                case BREWER, PLAYER -> null;
             };
         }
 

@@ -26,6 +26,9 @@ import lombok.Getter;
 import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 @Getter
 public enum BarrelWoodType {
@@ -56,6 +59,11 @@ public enum BarrelWoodType {
     // If you're adding more wood types, add them above 'NONE'
     NONE("None", -1, true);
 
+
+    public static final List<String> TAB_COMPLETIONS = Arrays.stream(values())
+        .filter(BarrelWoodType::isSpecific)
+        .map(BarrelWoodType::getFormattedName)
+        .toList();
 
     private final String formattedName;
     private final int index;
