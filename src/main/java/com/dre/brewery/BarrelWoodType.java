@@ -63,6 +63,7 @@ public enum BarrelWoodType {
     public static final List<String> TAB_COMPLETIONS = Arrays.stream(values())
         .filter(BarrelWoodType::isSpecific)
         .map(BarrelWoodType::getFormattedName)
+        .map(s -> s.replace(' ', '_'))
         .toList();
 
     private final String formattedName;
