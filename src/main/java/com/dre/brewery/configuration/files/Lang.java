@@ -313,6 +313,8 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String helpGive;
     @CustomKey("Help_Simulate")
     private String helpSimulate;
+    @CustomKey("Help_Simulate2")
+    private String helpSimulate2;
     @CustomKey("Help_Simulate_Options")
     private String helpSimulateOptions;
     @CustomKey("Help_Simulate_Distill")

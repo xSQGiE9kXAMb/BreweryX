@@ -24,6 +24,7 @@ import com.dre.brewery.BIngredients;
 import com.dre.brewery.BarrelWoodType;
 import com.dre.brewery.Brew;
 import com.dre.brewery.BreweryPlugin;
+import com.dre.brewery.commands.CommandUtil;
 import com.dre.brewery.commands.SubCommand;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.recipe.BCauldronRecipe;
@@ -52,7 +53,6 @@ public class SimulateCommand implements SubCommand {
 
     @Override
     public void execute(BreweryPlugin breweryPlugin, Lang lang, CommandSender sender, String label, String[] args) {
-        SimulationParameters simulationParameters;
         SimulationParser parser = new SimulationParser();
         int currentArgIdx = 1;
         while (true) {
@@ -67,9 +67,12 @@ public class SimulateCommand implements SubCommand {
             if (status instanceof Status.Help) {
                 sendUsage(lang, sender);
                 return;
+            } else if (status instanceof Status.Recipe) {
+                simulateRecipe(lang, sender, args);
+                return;
             } else if (status instanceof Status.Finished finished) {
-                simulationParameters = finished.simulation();
-                break;
+                simulateIngredients(lang, sender, args, currentArgIdx, finished.simulation());
+                return;
             } else if (status instanceof Status.Error error) {
                 lang.sendEntry(sender, error.errorType().getTranslationKey(), arg);
                 return;
@@ -78,6 +81,21 @@ public class SimulateCommand implements SubCommand {
             }
         }
 
+    }
+
+    private static void sendUsage(Lang lang, CommandSender sender) {
+        lang.sendEntry(sender, "Etc_Usage");
+        lang.sendEntry(sender, "Help_Simulate");
+        lang.sendEntry(sender, "Help_Simulate2");
+        lang.sendEntry(sender, "Help_Simulate_Options");
+        lang.sendEntry(sender, "Help_Simulate_Distill");
+        lang.sendEntry(sender, "Help_Simulate_Age");
+        lang.sendEntry(sender, "Help_Simulate_Brewer");
+        lang.sendEntry(sender, "Help_Simulate_Player");
+    }
+
+    private static void simulateIngredients(Lang lang, CommandSender sender, String[] args, int currentArgIdx,
+                                            SimulationParameters simulationParameters) {
         String ingredientsStr = Arrays.stream(args, currentArgIdx, args.length)
             .collect(Collectors.joining(" "));
         List<String> ingredientsList = BUtil.splitStringKeepingQuotes(ingredientsStr);
@@ -100,14 +118,18 @@ public class SimulateCommand implements SubCommand {
         simulate(lang, sender, simulationParameters, itemList);
     }
 
-    private static void sendUsage(Lang lang, CommandSender sender) {
-        lang.sendEntry(sender, "Etc_Usage");
-        lang.sendEntry(sender, "Help_Simulate");
-        lang.sendEntry(sender, "Help_Simulate_Options");
-        lang.sendEntry(sender, "Help_Simulate_Distill");
-        lang.sendEntry(sender, "Help_Simulate_Age");
-        lang.sendEntry(sender, "Help_Simulate_Brewer");
-        lang.sendEntry(sender, "Help_Simulate_Player");
+    private static void simulateRecipe(Lang lang, CommandSender sender, String[] args) {
+        String recipeArg = Arrays.stream(args)
+            .skip(1)
+            .collect(Collectors.joining(" "));
+        BRecipe recipe = BRecipe.getMatching(recipeArg);
+        if (recipe == null) {
+            lang.sendEntry(sender, "Error_NoBrewName", recipeArg);
+            return;
+        }
+
+        Logging.debugLog("simulate: simulating recipe " + recipe.getId());
+        simulate(lang, sender, SimulationParameters.of(recipe), recipe.getIngredients());
     }
 
     private static void simulate(Lang lang, CommandSender sender, SimulationParameters simulation, List<RecipeItem> itemList) {
@@ -176,29 +198,26 @@ public class SimulateCommand implements SubCommand {
 
     @Override
     public List<String> tabComplete(BreweryPlugin breweryPlugin, CommandSender sender, String label, String[] args) {
-        String lastArg = args[args.length - 1];
-
         SimulationParser parser = new SimulationParser();
         int currentArgIdx = 1;
         while (true) {
-            if (currentArgIdx >= args.length - 1) {
-                List<String> completions = parser.getTabCompletions();
-                return completions == null ? null : StringUtil.copyPartialMatches(lastArg, completions, new ArrayList<>());
-            }
             String arg = args[currentArgIdx];
+            if (currentArgIdx >= args.length - 1) {
+                List<String> completions = parser.getTabCompletions(arg);
+                return completions == null ? null : StringUtil.copyPartialMatches(arg, completions, new ArrayList<>());
+            }
 
             Status status = parser.parse(arg);
-            if (status instanceof Status.Help) {
+            if (status instanceof Status.Help || status instanceof Status.Error || status instanceof Status.Recipe) {
                 return List.of();
             } else if (status instanceof Status.Finished) {
                 break;
-            } else if (status instanceof Status.Error) {
-                return List.of();
             } else {
                 currentArgIdx++;
             }
         }
 
+        String lastArg = args[args.length - 1];
         return StringUtil.copyPartialMatches(lastArg, getIngredientCompletions(), new ArrayList<>());
     }
 
@@ -206,14 +225,16 @@ public class SimulateCommand implements SubCommand {
 
         private int cookedTime = -1;
         private int distillRuns = -1;
+        @Nullable
         BarrelWoodType woodType = null;
         private float ageTime = Float.NaN;
+        @Nullable
         private Player brewer = null;
+        @Nullable
         private Player player = null;
 
-        private State state = State.COOK_OR_HELP;
+        private State state = State.START;
 
-        @Nullable
         public Status parse(String arg) {
             if (arg.isBlank()) {
                 return new Status.Updated();
@@ -221,16 +242,20 @@ public class SimulateCommand implements SubCommand {
 
             switch (state) {
 
-                case COOK_OR_HELP -> {
+                case START -> {
                     if (arg.equalsIgnoreCase("help")) {
                         return new Status.Help();
                     }
-                    int cookedTime = BUtil.parseIntOrZero(arg);
-                    if (cookedTime <= 0) {
-                        return new Status.Error(ErrorType.COOK);
+                    if (BUtil.isInt(arg)) {
+                        int cookedTime = BUtil.parseIntOrZero(arg);
+                        if (cookedTime <= 0) {
+                            return new Status.Error(ErrorType.COOK);
+                        }
+                        this.cookedTime = cookedTime;
+                        state = State.OPTIONS;
+                    } else {
+                        return new Status.Recipe();
                     }
-                    this.cookedTime = cookedTime;
-                    state = State.OPTIONS;
                 }
 
                 case OPTIONS -> {
@@ -329,11 +354,12 @@ public class SimulateCommand implements SubCommand {
         }
 
         @Nullable
-        public List<String> getTabCompletions() {
+        public List<String> getTabCompletions(String arg) {
             return switch (state) {
-                case COOK_OR_HELP -> {
+                case START -> {
                     List<String> completions = new ArrayList<>(List.of("help"));
                     completions.addAll(BUtil.numberRange(1, 30));
+                    completions.addAll(CommandUtil.recipeNamesAndIds(arg));
                     yield completions;
                 }
                 case OPTIONS -> {
@@ -370,15 +396,23 @@ public class SimulateCommand implements SubCommand {
         }
 
         private enum State {
-            COOK_OR_HELP, OPTIONS, DISTILL, WOOD, AGE, BREWER, PLAYER
+            /** Either a number (cook time), string (recipe), or "help" */
+            START,
+            OPTIONS, DISTILL, WOOD, AGE, BREWER, PLAYER
         }
 
     }
 
     private sealed interface Status {
+        /** The parser was updated with the latest argument, and parsing should continue */
         record Updated() implements Status {}
+        /** Need to display command usage */
         record Help() implements Status {}
+        /** Command is {@code /brew simulate <Recipe>} */
+        record Recipe() implements Status {}
+        /** Parsing finished, next arguments are ingredients */
         record Finished(SimulationParameters simulation) implements Status {}
+        /** User error */
         record Error(ErrorType errorType) implements Status {}
     }
 
@@ -388,8 +422,27 @@ public class SimulateCommand implements SubCommand {
         @Nullable Age age,
         @Nullable Player brewer,
         @Nullable Player player
-    ) {}
-    private record Age(BarrelWoodType barrelType, float ageTime) {}
+    ) {
+        public static SimulationParameters of(BRecipe recipe) {
+            return new SimulationParameters(
+                recipe.getCookingTime(),
+                recipe.needsDistilling() ? OptionalInt.of(recipe.getDistillruns()) : OptionalInt.empty(),
+                Age.of(recipe),
+                null,
+                null
+            );
+        }
+    }
+
+    private record Age(BarrelWoodType barrelType, float ageTime) {
+        public static @Nullable Age of(BRecipe recipe) {
+            if (recipe.needsToAge()) {
+                BarrelWoodType barrelType = recipe.getWood();
+                return new Age(barrelType.isSpecific() ? barrelType : BarrelWoodType.OAK, recipe.getAge());
+            }
+            return null;
+        }
+    }
 
     @AllArgsConstructor
     @Getter
