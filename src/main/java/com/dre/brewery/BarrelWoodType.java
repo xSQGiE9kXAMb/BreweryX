@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalInt;
 
 
 @Getter
@@ -189,10 +190,13 @@ public enum BarrelWoodType {
      *         Returns BarrelWoodType.ANY if no match is found.
      */
     public static BarrelWoodType parse(String string) {
-        int index = BUtil.parseIntOr(string, -2);
-        for (BarrelWoodType type : values()) {
-            if (type.index == index) {
-                return type;
+        OptionalInt indexOpt = BUtil.parseInt(string);
+        if (indexOpt.isPresent()) {
+            int index = indexOpt.getAsInt();
+            for (BarrelWoodType type : values()) {
+                if (type.index == index) {
+                    return type;
+                }
             }
         }
         Material material = MaterialUtil.getMaterialSafely(string);

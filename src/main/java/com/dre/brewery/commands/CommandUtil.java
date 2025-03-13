@@ -73,7 +73,7 @@ public class CommandUtil {
 
         int page = 1;
         if (args.length > 1) {
-            page = BUtil.parseIntOrZero(args[1]);
+            page = BUtil.parseInt(args[1]).orElse(1);
         }
 
         ArrayList<String> commands = getCommands(sender);

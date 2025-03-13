@@ -50,6 +50,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -552,7 +554,58 @@ public final class BUtil {
         }
     }
 
-    public static int parseIntOrZero(String string) {
+    public static OptionalInt parseInt(@Nullable String string) {
+        if (string == null) {
+            return OptionalInt.empty();
+        }
+        try {
+            return OptionalInt.of(Integer.parseInt(string));
+        } catch (NumberFormatException ignored) {
+            return OptionalInt.empty();
+        }
+    }
+
+    /**
+     * Parses a non-infinite, non-NaN floating-point double.
+     * @param string the input string
+     * @return the optional
+     */
+    public static OptionalDouble parseDouble(@Nullable String string) {
+        if (string == null) {
+            return OptionalDouble.empty();
+        }
+        try {
+            double d = Double.parseDouble(string);
+            if (Double.isFinite(d)) {
+                return OptionalDouble.of(d);
+            }
+            return OptionalDouble.empty();
+        } catch (NumberFormatException ignored) {
+            return OptionalDouble.empty();
+        }
+    }
+
+    /**
+     * Parses a non-infinite, non-NaN floating-point float.
+     * @param string the input string
+     * @return the optional
+     */
+    public static OptionalFloat parseFloat(@Nullable String string) {
+        if (string == null) {
+            return OptionalFloat.empty();
+        }
+        try {
+            float f = Float.parseFloat(string);
+            if (Float.isFinite(f)) {
+                return OptionalFloat.of(f);
+            }
+            return OptionalFloat.empty();
+        } catch (NumberFormatException ignored) {
+            return OptionalFloat.empty();
+        }
+    }
+
+    public static int parseIntOrZero(@Nullable String string) {
         if (string == null) {
             return 0;
         }
@@ -564,19 +617,7 @@ public final class BUtil {
         }
     }
 
-    public static int parseIntOr(String string, int fallback) {
-        if (string == null) {
-            return fallback;
-        }
-
-        try {
-            return Integer.parseInt(string);
-        } catch (NumberFormatException ignored) {
-            return fallback;
-        }
-    }
-
-    public static double parseDoubleOrZero(String string) {
+    public static double parseDoubleOrZero(@Nullable String string) {
         if (string == null) {
             return 0;
         }
@@ -587,7 +628,7 @@ public final class BUtil {
         }
     }
 
-    public static float parseFloatOrZero(String string) {
+    public static float parseFloatOrZero(@Nullable String string) {
         if (string == null) {
             return 0;
         }
@@ -595,17 +636,6 @@ public final class BUtil {
             return Float.parseFloat(string);
         } catch (NumberFormatException ignored) {
             return 0;
-        }
-    }
-
-    public static float parseFloatOrNaN(String string) {
-        if (string == null) {
-            return Float.NaN;
-        }
-        try {
-            return Float.parseFloat(string);
-        } catch (NumberFormatException ignored) {
-            return Float.NaN;
         }
     }
 

@@ -52,7 +52,7 @@ public class AgeCommand implements SubCommand {
             return;
         }
 
-        float ageTime = BUtil.parseFloatOrZero(args[2]);
+        float ageTime = BUtil.parseFloat(args[2]).orElse(0);
         if (ageTime < 1) {
             lang.sendEntry(sender, "CMD_Invalid_Age_Time", args[2]);
             return;

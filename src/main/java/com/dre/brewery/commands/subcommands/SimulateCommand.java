@@ -247,8 +247,8 @@ public class SimulateCommand implements SubCommand {
                         return new Status.Help();
                     }
                     if (BUtil.isInt(arg)) {
-                        int cookedTime = BUtil.parseIntOrZero(arg);
-                        if (cookedTime <= 0) {
+                        int cookedTime = BUtil.parseInt(arg).orElse(-1);
+                        if (cookedTime < 0) {
                             return new Status.Error(ErrorType.COOK);
                         }
                         this.cookedTime = cookedTime;
@@ -296,7 +296,7 @@ public class SimulateCommand implements SubCommand {
                 }
 
                 case DISTILL -> {
-                    int distillRuns = BUtil.parseIntOrZero(arg);
+                    int distillRuns = BUtil.parseInt(arg).orElse(-1);
                     if (distillRuns < 0) {
                         return new Status.Error(ErrorType.DISTILL_RUNS);
                     }
@@ -313,7 +313,7 @@ public class SimulateCommand implements SubCommand {
                     state = State.AGE;
                 }
                 case AGE -> {
-                    float ageTime = BUtil.parseFloatOrZero(arg);
+                    float ageTime = BUtil.parseFloat(arg).orElse(-1);
                     if (ageTime < 0) {
                         return new Status.Error(ErrorType.AGE_TIME);
                     }
@@ -345,11 +345,14 @@ public class SimulateCommand implements SubCommand {
 
         // assumes cook time has been parsed
         private SimulationParameters createSimulation() {
-            if (cookedTime <= 0) {
-                throw new IllegalStateException("cookedTime <= 0");
+            if (cookedTime < 0) {
+                throw new IllegalStateException("cookedTime < 0");
             }
-            OptionalInt distill = distillRuns == -1 ? OptionalInt.empty() : OptionalInt.of(distillRuns);
-            Age age = woodType == null || Float.isNaN(ageTime) ? null : new Age(woodType, ageTime);
+            OptionalInt distill = distillRuns <= 0 ? OptionalInt.empty() : OptionalInt.of(distillRuns);
+
+            boolean hasAge = woodType != null && Float.isFinite(ageTime) && ageTime > 0;
+            Age age = !hasAge ? null : new Age(woodType, ageTime);
+
             return new SimulationParameters(cookedTime, distill, age, brewer, player);
         }
 
@@ -358,7 +361,7 @@ public class SimulateCommand implements SubCommand {
             return switch (state) {
                 case START -> {
                     List<String> completions = new ArrayList<>(List.of("help"));
-                    completions.addAll(BUtil.numberRange(1, 30));
+                    completions.addAll(BUtil.numberRange(0, 30));
                     completions.addAll(CommandUtil.recipeNamesAndIds(arg));
                     yield completions;
                 }

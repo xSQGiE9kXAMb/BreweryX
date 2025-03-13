@@ -41,7 +41,7 @@ public class DistillCommand implements SubCommand {
         if (args.length < 2) {
             cmdDistill(lang, (Player) sender, 1);
         } else {
-            int distillRuns = BUtil.parseIntOrZero(args[1]);
+            int distillRuns = BUtil.parseInt(args[1]).orElse(0);
             if (distillRuns <= 0) {
                 lang.sendEntry(sender, "CMD_Invalid_Distill_Runs", args[1]);
                 return;

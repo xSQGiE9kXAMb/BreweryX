@@ -232,7 +232,7 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String cmdSimulated;
     @CustomKey("CMD_Invalid_Option")
     private String cmdInvalidOption;
-    @CustomKey("CMD_DuplicateOption")
+    @CustomKey("CMD_Duplicate_Option")
     private String cmdDuplicateOption;
     @CustomKey("CMD_Invalid_Cook_Time")
     private String cmdInvalidCookTime;
