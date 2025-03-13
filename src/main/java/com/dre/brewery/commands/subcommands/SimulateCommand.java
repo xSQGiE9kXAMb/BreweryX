@@ -44,7 +44,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -233,6 +235,7 @@ public class SimulateCommand implements SubCommand {
         @Nullable
         private Player player = null;
 
+        private final EnumSet<Option> options = EnumSet.noneOf(Option.class);
         private State state = State.START;
 
         public Status parse(String arg) {
@@ -261,38 +264,15 @@ public class SimulateCommand implements SubCommand {
                 case OPTIONS -> {
                     if (!arg.startsWith("-")) {
                         return new Status.Finished(createSimulation());
-
-                    } else if (arg.equalsIgnoreCase("-d") || arg.equalsIgnoreCase("--distill")) {
-                        if (distillRuns == -1) {
-                            state = State.DISTILL;
-                        } else {
-                            return new Status.Error(ErrorType.DUPLICATE_OPTION);
-                        }
-
-                    } else if (arg.equalsIgnoreCase("-a") || arg.equalsIgnoreCase("--age")) {
-                        if (Float.isNaN(ageTime)) {
-                            state = State.WOOD;
-                        } else {
-                            return new Status.Error(ErrorType.DUPLICATE_OPTION);
-                        }
-
-                    } else if (arg.equalsIgnoreCase("-b") || arg.equalsIgnoreCase("--brewer")) {
-                        if (brewer == null) {
-                            state = State.BREWER;
-                        } else {
-                            return new Status.Error(ErrorType.DUPLICATE_OPTION);
-                        }
-
-                    } else if (arg.equalsIgnoreCase("-p") || arg.equalsIgnoreCase("--player")) {
-                        if (player == null) {
-                            state = State.PLAYER;
-                        } else {
-                            return new Status.Error(ErrorType.DUPLICATE_OPTION);
-                        }
-
-                    } else {
-                        return new Status.Error(ErrorType.OPTION);
                     }
+                    Option option = Option.get(arg);
+                    if (option == null) {
+                        return new Status.Error(ErrorType.INVALID_OPTION);
+                    }
+                    if (!options.add(option)) {
+                        return new Status.Error(ErrorType.DUPLICATE_OPTION);
+                    }
+                    state = option.getState();
                 }
 
                 case DISTILL -> {
@@ -366,7 +346,8 @@ public class SimulateCommand implements SubCommand {
                     yield completions;
                 }
                 case OPTIONS -> {
-                    List<String> completions = getOptionCompletions();
+                    List<String> completions = new ArrayList<>();
+                    completions.addAll(getOptionCompletions());
                     completions.addAll(getIngredientCompletions());
                     yield completions;
                 }
@@ -378,24 +359,39 @@ public class SimulateCommand implements SubCommand {
         }
 
         private List<String> getOptionCompletions() {
-            List<String> completions = new ArrayList<>();
-            if (distillRuns == -1) {
-                completions.add("-d");
-                completions.add("--distill");
+            return EnumSet.complementOf(options).stream()
+                .map(Option::getOptions)
+                .flatMap(List::stream)
+                .toList();
+        }
+
+        @Getter
+        private enum Option {
+            DISTILL(State.DISTILL, "-d", "--distill"),
+            AGE(State.WOOD, "-a", "--age"),
+            BREWER(State.BREWER, "-b", "--brewer"),
+            PLAYER(State.PLAYER, "-p", "--player");
+
+            private final State state;
+            private final List<String> options;
+
+            Option(State state, String... options) {
+                this.state = state;
+                this.options = List.of(options);
             }
-            if (Float.isNaN(ageTime)) {
-                completions.add("-a");
-                completions.add("--age");
+
+            public boolean matches(String arg) {
+                return options.contains(arg.toLowerCase(Locale.ROOT));
             }
-            if (brewer == null) {
-                completions.add("-b");
-                completions.add("--brewer");
+
+            public static @Nullable Option get(String arg) {
+                for (Option option : values()) {
+                    if (option.matches(arg)) {
+                        return option;
+                    }
+                }
+                return null;
             }
-            if (player == null) {
-                completions.add("-p");
-                completions.add("--player");
-            }
-            return completions;
         }
 
         private enum State {
@@ -451,7 +447,7 @@ public class SimulateCommand implements SubCommand {
     @Getter
     private enum ErrorType {
         COOK("CMD_Invalid_Cook_Time"),
-        OPTION("CMD_Invalid_Option"),
+        INVALID_OPTION("CMD_Invalid_Option"),
         DUPLICATE_OPTION("CMD_Duplicate_Option"),
         DISTILL_RUNS("CMD_Invalid_Distill_Runs"),
         WOOD_TYPE("CMD_Invalid_Wood_Type"),

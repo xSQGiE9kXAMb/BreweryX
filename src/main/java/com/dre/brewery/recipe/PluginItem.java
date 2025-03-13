@@ -148,7 +148,10 @@ public abstract class PluginItem extends RecipeItem implements Ingredient {
 
     @Override
     public String getDebugID() {
-        return itemId;
+        if (plugin == null) {
+            return itemId;
+        }
+        return plugin + ":" + itemId;
     }
 
     @Override
