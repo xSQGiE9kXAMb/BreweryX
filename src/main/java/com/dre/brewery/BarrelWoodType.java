@@ -58,6 +58,7 @@ public enum BarrelWoodType {
     ),
     PALE_OAK("Pale Oak", 13),
     // If you're adding more wood types, add them above 'NONE'
+    // Remember to also add the wood type to the Group enum
     NONE("None", -1, true);
 
 
@@ -133,6 +134,55 @@ public enum BarrelWoodType {
     }
 
 
+    /**
+     * Computes the distance 0-4 between two barrel types.
+     * Similar barrel types, such as oak and dark oak, have a distance of 1.
+     * Copper has a distance of 3 with every other barrel type.
+     * @param other the other barrel type
+     * @return The distance, or -1 if this or the other barrel type is ANY or NONE
+     */
+    public int getDistance(BarrelWoodType other) {
+        Group group = Group.of(this);
+        Group otherGroup = Group.of(other);
+        if (group == null || otherGroup == null) {
+            return -1;
+        }
+
+        // Checking if barrel types are the same *after* checking for ANY or NONE
+        if (this == other) {
+            return 0;
+        }
+        // Group distance is 0-3, add 1 to get 1-4 where distance 1 is two barrel types in the same group
+        return group.getDistance(otherGroup) + 1;
+    }
+
+    /**
+     * Advances this barrel type towards another barrel type by a specified number of steps.
+     * Each step moves the barrel type by one group, or to another barrel type within the same group.
+     * Copper is a special case, requiring at least 3 steps to reach it, otherwise nothing changes.
+     * Barrel types are a maximum of 4 distance apart, so taking 4 or more steps always reaches the destination.
+     * @param other The target barrel type to step towards
+     * @param steps The number of steps to take towards the target type
+     * @return The resulting barrel type after taking the steps
+     */
+    public BarrelWoodType stepTowards(BarrelWoodType other, int steps) {
+        if (this == other || steps >= Group.MAX_DISTANCE + 1) {
+            return other;
+        }
+
+        Group group = Group.of(this);
+        Group otherGroup = Group.of(other);
+        if (group == null || otherGroup == null) {
+            return this;
+        }
+
+        if (group == otherGroup) {
+            return other;
+        }
+        return group.stepTowards(otherGroup, steps).members[0];
+    }
+
+
     public static BarrelWoodType fromName(String name) {
         for (BarrelWoodType type : values()) {
             if (type.name().equalsIgnoreCase(name) || type.formattedName.equalsIgnoreCase(name)) {
@@ -204,6 +254,149 @@ public enum BarrelWoodType {
             return fromMaterial(material);
         }
         return fromName(string);
+    }
+
+
+    // If another group needs to be added, consider changing getDistance() and stepTowards() with
+    // a breadth-first search algorithm if implementation becomes too complicated.
+    private enum Group {
+        /*
+                             NETHER
+                                |
+                      OAK    HOT_DRY
+                       |    /   |
+          COLD --- TEMPERATE    |
+                            \   |
+                             HOT_HUMID
+        */
+        COLD(SPRUCE),
+        TEMPERATE(BIRCH, CHERRY),
+        OAK(BarrelWoodType.OAK, DARK_OAK, PALE_OAK),
+        HOT_HUMID(JUNGLE, MANGROVE, BAMBOO),
+        HOT_DRY(ACACIA),
+        NETHER(CRIMSON, WARPED),
+        SPECIAL(CUT_COPPER);
+
+        public static final int MAX_DISTANCE = 3;
+        public static final int SPECIAL_DISTANCE = 2;
+
+        private final BarrelWoodType[] members;
+        Group(BarrelWoodType... members) {
+            this.members = members;
+        }
+
+        public static Group of(BarrelWoodType type) {
+            for (Group group : Group.values()) {
+                if (group.contains(type)) {
+                    return group;
+                }
+            }
+            return null;
+        }
+
+        private boolean contains(BarrelWoodType type) {
+            for (BarrelWoodType member : members) {
+                if (member == type) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+//        private List<Group> getNeighbors() {
+//            return switch (this) {
+//                case COLD -> List.of(TEMPERATE);
+//                case TEMPERATE -> List.of(COLD, OAK, HOT_HUMID, HOT_DRY);
+//                case OAK -> List.of(TEMPERATE);
+//                case HOT_HUMID -> List.of(TEMPERATE, HOT_DRY);
+//                case HOT_DRY -> List.of(TEMPERATE, HOT_HUMID, NETHER);
+//                case NETHER -> List.of(HOT_DRY);
+//                // COPPER
+//                default -> Collections.emptyList();
+//            };
+//        }
+
+        /**
+         * Computes the distance 0-3 between two groups.
+         * The SPECIAL group is a special case, and always has {@link #SPECIAL_DISTANCE} from other groups.
+         * @param other The other group
+         * @return The distance
+         */
+        public int getDistance(Group other) {
+            assert other != null;
+            if (this == other) {
+                return 0;
+            }
+            if (this == SPECIAL || other == SPECIAL) {
+                return SPECIAL_DISTANCE;
+            }
+
+            int distance = 0;
+            Group current = this;
+            while (current != other) {
+                current = current.stepTowards(other);
+                distance++;
+            }
+            return distance;
+        }
+
+        /**
+         * Advances this group towards another group by a specified number of steps.
+         * Each step moves from one group to another.
+         * The SPECIAL is a special case, requiring at least {@link #SPECIAL_DISTANCE} steps to reach it,
+         * otherwise nothing changes.
+         * @param to The group to move towards
+         * @param steps The number of steps to take
+         * @return The resulting group
+         */
+        public Group stepTowards(Group to, int steps) {
+            assert to != null;
+            if (this == SPECIAL) {
+                return steps >= SPECIAL_DISTANCE ? to : SPECIAL;
+            }
+            if (to == SPECIAL) {
+                return steps >= SPECIAL_DISTANCE ? SPECIAL : this;
+            }
+
+            Group current = this;
+            for (int i = 0; i < steps; i++) {
+                current = current.stepTowards(to);
+                if (current == to) {
+                    return current;
+                }
+            }
+            return current;
+        }
+        private Group stepTowards(Group to) {
+            assert to != null;
+            if (this == SPECIAL) {
+                throw new IllegalStateException("stepTowards(Group) must not be called from SPECIAL");
+            }
+            if (this == to) {
+                return this;
+            }
+
+            return switch (this) {
+                case COLD -> TEMPERATE;
+                case TEMPERATE -> switch (to) {
+                    case NETHER -> HOT_DRY;
+                    default -> to;
+                };
+                case OAK -> TEMPERATE;
+                case HOT_HUMID -> switch (to) {
+                    case COLD, OAK -> TEMPERATE;
+                    case NETHER -> HOT_DRY;
+                    default -> to;
+                };
+                case HOT_DRY -> switch (to) {
+                    case COLD, OAK -> TEMPERATE;
+                    default -> to;
+                };
+                case NETHER -> HOT_DRY;
+                // SPECIAL
+                default -> throw new IllegalArgumentException("stepTowards(Group) must not be called with SPECIAL");
+            };
+        }
     }
 
 }
