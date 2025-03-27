@@ -27,6 +27,7 @@ import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.OptionalInt;
 
@@ -61,6 +62,9 @@ public enum BarrelWoodType {
     // Remember to also add the wood type to the Group enum
     NONE("None", -1, true);
 
+
+    public static final int MAX_DISTANCE = Group.MAX_DISTANCE + 1;
+    public static final int COPPER_DISTANCE = Group.SPECIAL_DISTANCE + 1;
 
     public static final List<String> TAB_COMPLETIONS = Arrays.stream(values())
         .filter(BarrelWoodType::isSpecific)
@@ -135,9 +139,9 @@ public enum BarrelWoodType {
 
 
     /**
-     * Computes the distance 0-4 between two barrel types.
+     * Computes the distance 0 to {@link #MAX_DISTANCE} between two barrel types.
      * Similar barrel types, such as oak and dark oak, have a distance of 1.
-     * Copper has a distance of 3 with every other barrel type.
+     * Copper has a distance of {@link #COPPER_DISTANCE} with every other barrel type.
      * @param other the other barrel type
      * @return The distance, or -1 if this or the other barrel type is ANY or NONE
      */
@@ -257,31 +261,32 @@ public enum BarrelWoodType {
     }
 
 
-    // If another group needs to be added, consider changing getDistance() and stepTowards() with
-    // a breadth-first search algorithm if implementation becomes too complicated.
     private enum Group {
         /*
-                             NETHER
-                                |
-                      OAK    HOT_DRY
-                       |    /   |
+                      OAK    HOT_DRY --- NETHER
+                       ^    /   |
           COLD --- TEMPERATE    |
                             \   |
                              HOT_HUMID
+
+          temperature x-axis, humidity y-axis, oak z-axis
         */
-        COLD(SPRUCE),
-        TEMPERATE(BIRCH, CHERRY),
-        OAK(BarrelWoodType.OAK, DARK_OAK, PALE_OAK),
-        HOT_HUMID(JUNGLE, MANGROVE, BAMBOO),
-        HOT_DRY(ACACIA),
-        NETHER(CRIMSON, WARPED),
-        SPECIAL(CUT_COPPER);
+        COLD(new Properties.Normal(Temperature.COLD, Humidity.MODERATE), SPRUCE),
+        TEMPERATE(new Properties.Normal(Temperature.WARM, Humidity.MODERATE), BIRCH, CHERRY),
+        OAK(new Properties.Normal(Temperature.WARM, Humidity.MODERATE, true), BarrelWoodType.OAK, DARK_OAK, PALE_OAK),
+        HOT_HUMID(new Properties.Normal(Temperature.HOT, Humidity.HUMID), JUNGLE, MANGROVE, BAMBOO),
+        HOT_DRY(new Properties.Normal(Temperature.HOT, Humidity.DRY), ACACIA),
+        NETHER(new Properties.Normal(Temperature.NETHER, Humidity.DRY), CRIMSON, WARPED),
+        SPECIAL(new Properties.Special(), CUT_COPPER);
 
-        public static final int MAX_DISTANCE = 3;
-        public static final int SPECIAL_DISTANCE = 2;
+        public static final int MAX_DISTANCE = 4;
+        public static final int SPECIAL_DISTANCE = 3;
 
+        private final Properties properties;
         private final BarrelWoodType[] members;
-        Group(BarrelWoodType... members) {
+
+        Group(Properties properties, BarrelWoodType... members) {
+            this.properties = properties;
             this.members = members;
         }
 
@@ -303,19 +308,6 @@ public enum BarrelWoodType {
             return false;
         }
 
-//        private List<Group> getNeighbors() {
-//            return switch (this) {
-//                case COLD -> List.of(TEMPERATE);
-//                case TEMPERATE -> List.of(COLD, OAK, HOT_HUMID, HOT_DRY);
-//                case OAK -> List.of(TEMPERATE);
-//                case HOT_HUMID -> List.of(TEMPERATE, HOT_DRY);
-//                case HOT_DRY -> List.of(TEMPERATE, HOT_HUMID, NETHER);
-//                case NETHER -> List.of(HOT_DRY);
-//                // COPPER
-//                default -> Collections.emptyList();
-//            };
-//        }
-
         /**
          * Computes the distance 0-3 between two groups.
          * The SPECIAL group is a special case, and always has {@link #SPECIAL_DISTANCE} from other groups.
@@ -327,17 +319,14 @@ public enum BarrelWoodType {
             if (this == other) {
                 return 0;
             }
-            if (this == SPECIAL || other == SPECIAL) {
+            if (!(properties instanceof Properties.Normal props) || !(other.properties instanceof Properties.Normal otherProps)) {
                 return SPECIAL_DISTANCE;
             }
 
-            int distance = 0;
-            Group current = this;
-            while (current != other) {
-                current = current.stepTowards(other);
-                distance++;
-            }
-            return distance;
+            int temperatureDistance = Math.abs(props.temperature.ordinal() - otherProps.temperature.ordinal());
+            int humidityDistance = Math.abs(props.humidity.ordinal() - otherProps.humidity.ordinal());
+            int oakDistance = props.oak != otherProps.oak ? 1 : 0;
+            return temperatureDistance + humidityDistance + oakDistance;
         }
 
         /**
@@ -351,52 +340,31 @@ public enum BarrelWoodType {
          */
         public Group stepTowards(Group to, int steps) {
             assert to != null;
-            if (this == SPECIAL) {
-                return steps >= SPECIAL_DISTANCE ? to : SPECIAL;
-            }
-            if (to == SPECIAL) {
-                return steps >= SPECIAL_DISTANCE ? SPECIAL : this;
-            }
-
-            Group current = this;
-            for (int i = 0; i < steps; i++) {
-                current = current.stepTowards(to);
-                if (current == to) {
-                    return current;
-                }
-            }
-            return current;
+            Comparator<Group> comparatorInitial = Comparator.comparing(g -> g.getDistance(to));
+            // Tiebreaker comparator, should never be used unless we add a group
+            Comparator<Group> comparator = comparatorInitial.thenComparing(Enum::ordinal);
+            return Arrays.stream(values())
+                .filter(g -> getDistance(g) <= steps) // Out of all groups within `steps` distance...
+                .min(comparator) // ...get the group closest to the target...
+                .filter(g -> g.getDistance(to) < getDistance(to)) // ...as long as that group is actually closer
+                .orElse(this); // If no groups are in range, make no movement
         }
-        private Group stepTowards(Group to) {
-            assert to != null;
-            if (this == SPECIAL) {
-                throw new IllegalStateException("stepTowards(Group) must not be called from SPECIAL");
-            }
-            if (this == to) {
-                return this;
-            }
+    }
 
-            return switch (this) {
-                case COLD -> TEMPERATE;
-                case TEMPERATE -> switch (to) {
-                    case NETHER -> HOT_DRY;
-                    default -> to;
-                };
-                case OAK -> TEMPERATE;
-                case HOT_HUMID -> switch (to) {
-                    case COLD, OAK -> TEMPERATE;
-                    case NETHER -> HOT_DRY;
-                    default -> to;
-                };
-                case HOT_DRY -> switch (to) {
-                    case COLD, OAK -> TEMPERATE;
-                    default -> to;
-                };
-                case NETHER -> HOT_DRY;
-                // SPECIAL
-                default -> throw new IllegalArgumentException("stepTowards(Group) must not be called with SPECIAL");
-            };
+    private sealed interface Properties {
+        record Normal(Temperature temperature, Humidity humidity, boolean oak) implements Properties {
+            public Normal(Temperature temperature, Humidity humidity) {
+                this(temperature, humidity, false);
+            }
         }
+        record Special() implements Properties {}
+    }
+
+    private enum Temperature {
+        COLD, WARM, HOT, NETHER
+    }
+    private enum Humidity {
+        DRY, MODERATE, HUMID
     }
 
 }

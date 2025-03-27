@@ -449,9 +449,9 @@ public class BIngredients {
 
         return Math.max(quality, 0);
     }
-    // At difficulty 1, distances 0-4 have quality 10, 10, 9, 8, 7
-    // At difficulty 5, distances 0-4 have quality 10, 8, 4, 1, 0
-    // At difficulty 10, distances 0-4 have quality 10, 5, 0, 0, 0
+    // At difficulty 1, distances 0-5 have quality 10, 10, 9, 8, 7, 6
+    // At difficulty 5, distances 0-5 have quality 10, 8, 4, 1, 0, 0
+    // At difficulty 10, distances 0-5 have quality 10, 5, 0, 0, 0, 0
     // See: https://www.desmos.com/calculator/aaoixs2qo7
     private int getWoodQualityNew(BRecipe recipe, BarrelWoodType wood) {
         BarrelWoodType recipeWood = recipe.getWood();
@@ -461,6 +461,7 @@ public class BIngredients {
             case 2 -> 7.75f;
             case 3 -> 6.25f;
             case 4 -> 4.5f;
+            case 5 -> 2.5f;
             default -> 0.0f;
         };
         if (baseQuality == 0.0f) {
