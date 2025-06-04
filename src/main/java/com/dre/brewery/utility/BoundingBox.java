@@ -31,7 +31,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class BoundingBox {
 
     @Data
@@ -41,6 +40,10 @@ public class BoundingBox {
     }
 
     private BlockPos min, max;
+
+    public BoundingBox(BlockPos a, BlockPos b) {
+        this(a.x, a.y, a.z, b.x, b.y, b.z);
+    }
 
     public BoundingBox(int x1, int y1, int z1, int x2, int y2, int z2) {
         int minX, minY, minZ, maxX, maxY, maxZ;
