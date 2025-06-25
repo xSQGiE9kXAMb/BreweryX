@@ -44,7 +44,7 @@ public class TranslationListener implements Listener {
 
         HitBox hitBox = event.getCraft().getHitBox();
         for (Barrel barrel : Barrel.barrels) {
-            Location location = barrel.getSpigot().getLocation().clone();
+            Location location = barrel.getSpigot().getLocation();
             MovecraftLocation mvLocation = MathUtils.bukkit2MovecraftLoc(location);
 
             if (hitBox.contains(mvLocation)) {
