@@ -33,11 +33,7 @@ import java.util.List;
 @Setter
 public class BoundingBox {
 
-    @Data
-    @AllArgsConstructor
-    public static class BlockPos {
-        private int x, y, z;
-    }
+    public record BlockPos(int x, int y, int z) { }
 
     private BlockPos min, max;
 

@@ -62,12 +62,12 @@ public class RotationListener implements Listener {
         barrel.setSpigot( rtSpigot.toBukkit(world).getBlock() );
 
         BoundingBox.BlockPos min = box.getMin();
-        MovecraftLocation mvMin = new MovecraftLocation(min.getX(), min.getY(), min.getZ());
+        MovecraftLocation mvMin = new MovecraftLocation(min.x(), min.y(), min.z());
         MovecraftLocation rtMin = rotateCentered(rotation, mvMin, origin);
         BoundingBox.BlockPos bpMin = adapt(rtMin);
 
         BoundingBox.BlockPos max = box.getMax();
-        MovecraftLocation mvMax = new MovecraftLocation(max.getX(), max.getY(), max.getZ());
+        MovecraftLocation mvMax = new MovecraftLocation(max.x(), max.y(), max.z());
         MovecraftLocation rtMax = rotateCentered(rotation, mvMax, origin);
         BoundingBox.BlockPos bpMax = adapt(rtMax);
 
