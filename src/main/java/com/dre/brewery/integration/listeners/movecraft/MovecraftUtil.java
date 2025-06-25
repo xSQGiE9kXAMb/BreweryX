@@ -21,7 +21,10 @@
 package com.dre.brewery.integration.listeners.movecraft;
 
 import com.dre.brewery.Barrel;
+import com.dre.brewery.integration.listeners.movecraft.properties.BreweryProperties;
+import com.dre.brewery.integration.listeners.movecraft.properties.MaxBarrelEntry;
 import net.countercraft.movecraft.MovecraftLocation;
+import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.util.MathUtils;
 import net.countercraft.movecraft.util.hitboxes.HitBox;
 import org.bukkit.Location;
@@ -51,5 +54,18 @@ public class MovecraftUtil {
         }
 
         return output;
+    }
+
+    public static Set<MaxBarrelEntry> getBarrelsProperty(CraftType type) {
+        try {
+            Object objectProperty = type.getObjectProperty(BreweryProperties.MAX_BARRELS);
+            if (objectProperty instanceof Set<?> property) {
+                return (Set<MaxBarrelEntry>) property;
+            } else {
+                throw new IllegalStateException("maxBarrels must be a set.");
+            }
+        } catch (Exception exception) {
+            return Set.of();
+        }
     }
 }
