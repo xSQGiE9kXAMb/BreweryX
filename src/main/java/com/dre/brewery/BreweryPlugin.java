@@ -40,6 +40,7 @@ import com.dre.brewery.integration.listeners.SlimefunListener;
 import com.dre.brewery.integration.listeners.movecraft.RotationListener;
 import com.dre.brewery.integration.listeners.movecraft.SinkListener;
 import com.dre.brewery.integration.listeners.movecraft.TranslationListener;
+import com.dre.brewery.integration.listeners.movecraft.properties.BreweryProperties;
 import com.dre.brewery.listeners.BlockListener;
 import com.dre.brewery.listeners.CauldronListener;
 import com.dre.brewery.listeners.EntityListener;
@@ -103,6 +104,13 @@ public final class BreweryPlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        // movecraft properties must be registered in the onLoad
+        try {
+            Class.forName("net.countercraft.movecraft.craft.type.property.Property");
+            BreweryProperties.register();
+        } catch (Exception ignored) {
+        }
+
         if (getMCVersion().isOrLater(MinecraftVersion.V1_14)) {
             // Campfires are weird. Initialize once now, so it doesn't lag later when we check for campfires under Cauldrons
             getServer().createBlockData(Material.CAMPFIRE);
