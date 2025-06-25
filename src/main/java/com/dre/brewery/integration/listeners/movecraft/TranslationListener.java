@@ -37,32 +37,32 @@ import javax.annotation.Nullable;
 
 public class TranslationListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void translateListener(CraftTranslateEvent e) {
-        Vector v = delta(e);
-        if (v == null)
+    public void translateListener(CraftTranslateEvent event) {
+        Vector delta = delta(event);
+        if (delta == null)
             return;
 
-        HitBox hitBox = e.getCraft().getHitBox();
+        HitBox hitBox = event.getCraft().getHitBox();
         for (Barrel barrel : Barrel.barrels) {
             Location location = barrel.getSpigot().getLocation().clone();
             MovecraftLocation mvLocation = MathUtils.bukkit2MovecraftLoc(location);
 
             if (hitBox.contains(mvLocation)) {
                 BoundingBox box = barrel.getBounds();
-                box.setMin(move(box.getMin(), v));
-                box.setMax(move(box.getMax(), v));
-                barrel.setSpigot( location.add(v.getX(), v.getY(), v.getZ()).getBlock() );
+                box.setMin(move(box.getMin(), delta));
+                box.setMax(move(box.getMax(), delta));
+                barrel.setSpigot( location.add(delta.getX(), delta.getY(), delta.getZ()).getBlock() );
             }
         }
     }
 
     @Nullable
-    private Vector delta(@NotNull CraftTranslateEvent e) {
-        if (e.getOldHitBox().isEmpty() || e.getNewHitBox().isEmpty())
+    private Vector delta(@NotNull CraftTranslateEvent event) {
+        if (event.getOldHitBox().isEmpty() || event.getNewHitBox().isEmpty())
             return null;
 
-        MovecraftLocation oldMid = e.getOldHitBox().getMidPoint();
-        MovecraftLocation newMid = e.getNewHitBox().getMidPoint();
+        MovecraftLocation oldMid = event.getOldHitBox().getMidPoint();
+        MovecraftLocation newMid = event.getNewHitBox().getMidPoint();
 
         int dx = newMid.getX() - oldMid.getX();
         int dy = newMid.getY() - oldMid.getY();
