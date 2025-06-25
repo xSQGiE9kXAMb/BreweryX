@@ -27,7 +27,6 @@ import net.countercraft.movecraft.craft.type.CraftType;
 import net.countercraft.movecraft.craft.type.TypeData;
 import net.countercraft.movecraft.craft.type.property.BooleanProperty;
 import net.countercraft.movecraft.craft.type.property.ObjectPropertyImpl;
-import net.countercraft.movecraft.craft.type.transform.BooleanTransform;
 import net.countercraft.movecraft.craft.type.transform.MaterialSetTransform;
 import net.countercraft.movecraft.util.Pair;
 import org.bukkit.Material;
@@ -40,7 +39,6 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static net.countercraft.movecraft.craft.type.TypeData.NUMERIC_PREFIX;
 
