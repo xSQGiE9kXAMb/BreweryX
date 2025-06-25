@@ -23,8 +23,8 @@ package com.dre.brewery.integration.listeners.movecraft;
 import com.dre.brewery.Barrel;
 import com.dre.brewery.utility.BoundingBox;
 import net.countercraft.movecraft.MovecraftLocation;
+import net.countercraft.movecraft.craft.Craft;
 import net.countercraft.movecraft.events.CraftTranslateEvent;
-import net.countercraft.movecraft.util.MathUtils;
 import net.countercraft.movecraft.util.hitboxes.HitBox;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
@@ -42,17 +42,15 @@ public class TranslationListener implements Listener {
         if (delta == null)
             return;
 
-        HitBox hitBox = event.getCraft().getHitBox();
-        for (Barrel barrel : Barrel.barrels) {
+        Craft craft = event.getCraft();
+        HitBox hitBox = craft.getHitBox();
+        for (Barrel barrel : MovecraftUtil.barrelsOnCraft(hitBox, craft.getWorld())) {
             Location location = barrel.getSpigot().getLocation();
-            MovecraftLocation mvLocation = MathUtils.bukkit2MovecraftLoc(location);
 
-            if (hitBox.contains(mvLocation)) {
-                BoundingBox box = barrel.getBounds();
-                box.setMin(move(box.getMin(), delta));
-                box.setMax(move(box.getMax(), delta));
-                barrel.setSpigot( location.add(delta.getX(), delta.getY(), delta.getZ()).getBlock() );
-            }
+            BoundingBox box = barrel.getBounds();
+            box.setMin(move(box.getMin(), delta));
+            box.setMax(move(box.getMax(), delta));
+            barrel.setSpigot( location.add(delta.getX(), delta.getY(), delta.getZ()).getBlock() );
         }
     }
 

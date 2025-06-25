@@ -42,13 +42,8 @@ public class RotationListener implements Listener {
         MovecraftLocation originPoint = event.getOriginPoint();
 
         HitBox hitBox = craft.getHitBox();
-        for (Barrel barrel : Barrel.barrels) {
-            Location location = barrel.getSpigot().getLocation().clone();
-            MovecraftLocation mvLocation = MathUtils.bukkit2MovecraftLoc(location);
-
-            if (hitBox.contains(mvLocation)) {
-                rotate(barrel, rotation, originPoint);
-            }
+        for (Barrel barrel : MovecraftUtil.barrelsOnCraft(hitBox, craft.getWorld())) {
+            rotate(barrel, rotation, originPoint);
         }
     }
 
