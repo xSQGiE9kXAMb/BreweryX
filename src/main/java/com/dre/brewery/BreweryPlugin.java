@@ -37,6 +37,7 @@ import com.dre.brewery.integration.listeners.ChestShopListener;
 import com.dre.brewery.integration.listeners.IntegrationListener;
 import com.dre.brewery.integration.listeners.ShopKeepersListener;
 import com.dre.brewery.integration.listeners.SlimefunListener;
+import com.dre.brewery.integration.listeners.movecraft.CraftDetectListener;
 import com.dre.brewery.integration.listeners.movecraft.RotationListener;
 import com.dre.brewery.integration.listeners.movecraft.SinkListener;
 import com.dre.brewery.integration.listeners.movecraft.TranslationListener;
@@ -225,6 +226,7 @@ public final class BreweryPlugin extends JavaPlugin {
         if (Hook.SLIMEFUN.isEnabled() && getMCVersion().isOrLater(MinecraftVersion.V1_14))
             getServer().getPluginManager().registerEvents(new SlimefunListener(), this);
         if (Hook.MOVECRAFT.isEnabled()) {
+            getServer().getPluginManager().registerEvents(new CraftDetectListener(), this);
             getServer().getPluginManager().registerEvents(new TranslationListener(), this);
             getServer().getPluginManager().registerEvents(new RotationListener(), this);
             getServer().getPluginManager().registerEvents(new SinkListener(), this);
