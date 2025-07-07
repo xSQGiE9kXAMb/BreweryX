@@ -420,25 +420,31 @@ public class Barrel extends BarrelBody implements InventoryHolder {
 
                 BarrelWoodType wood = this.getWood();
                 for (ItemStack item : items) {
-                    if (item != null) {
-                        Brew brew = Brew.get(item);
-                        if (brew != null) {
-                            // Brew before throwing
-                            brew.age(item, time, wood);
-                            PotionMeta meta = (PotionMeta) item.getItemMeta();
-                            if (BrewLore.hasColorLore(meta)) {
-                                BrewLore lore = new BrewLore(brew, meta);
-                                lore.convertLore(false);
-                                lore.write();
-                                item.setItemMeta(meta);
+                    try {
+                        if (item != null) {
+                            Brew brew = Brew.get(item);
+                            if (brew != null) {
+                                // Brew before throwing
+                                brew.age(item, time, wood);
+                                PotionMeta meta = (PotionMeta) item.getItemMeta();
+                                if (BrewLore.hasColorLore(meta)) {
+                                    BrewLore lore = new BrewLore(brew, meta);
+                                    lore.convertLore(false);
+                                    lore.write();
+                                    item.setItemMeta(meta);
+                                }
+                            }
+                            // "broken" is the block that destroyed, throw them there!
+                            if (broken != null) {
+                                broken.getWorld().dropItem(broken.getLocation(), item);
+                            } else {
+                                spigot.getWorld().dropItem(spigot.getLocation(), item);
                             }
                         }
-                        // "broken" is the block that destroyed, throw them there!
-                        if (broken != null) {
-                            broken.getWorld().dropItem(broken.getLocation(), item);
-                        } else {
-                            spigot.getWorld().dropItem(spigot.getLocation(), item);
-                        }
+                    } catch (Throwable e) {
+                        // Sensitive code, we do not want some items to drop, throw an error in the for loop and not
+                        // deregister the barrel.
+                        e.printStackTrace();
                     }
                 }
             }
