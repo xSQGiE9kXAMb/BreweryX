@@ -34,7 +34,7 @@ plugins {
     id("io.papermc.hangar-publish-plugin") version "0.1.2"
     id("com.modrinth.minotaur") version "2.8.7"
     id("xyz.jpenilla.run-paper") version "2.3.1"
-    id("io.github.0ffz.github-packages") version "1.2.1"
+    id("io.github.apdevteam.github-packages") version "1.2.2"
 }
 
 group = "com.dre.brewery"
