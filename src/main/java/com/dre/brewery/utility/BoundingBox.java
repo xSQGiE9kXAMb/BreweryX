@@ -65,14 +65,14 @@ public class BoundingBox {
         return contains(block.getX(), block.getY(), block.getZ());
     }
 
-    public long area() {
+    public long volume() {
         return ((long) (max.z - min.z + 1)) * ((long) (max.y - min.y + 1)) * ((long) (max.z - min.z + 1));
     }
 
     // Quick check if the bounds are valid or seem corrupt
     public boolean isBad() {
-        long area = this.area();
-        return area > 64 || area < 4;
+        long volume = this.volume();
+        return volume != 8 && volume != 36;
     }
 
     public void resize(int x1, int y1, int z1, int x2, int y2, int z2) {

@@ -27,6 +27,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 
 @Getter
@@ -52,9 +53,10 @@ public class Hook {
     public static final Hook MOVECRAFT = new Hook("Movecraft");
 
 
-    protected final String name;
-    protected boolean enabled;
-    protected boolean checked;
+    private final String name;
+    @ApiStatus.Internal
+    private boolean enabled;
+    private boolean checked;
 
     public Hook(String name) {
         this.name = name;
