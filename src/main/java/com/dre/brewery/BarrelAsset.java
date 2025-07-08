@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -42,7 +41,7 @@ public enum BarrelAsset {
 
     static {
         for (BarrelWoodType type : BarrelWoodType.values()) {
-            HashMap<BarrelAsset, Set<Material>> newMap = new HashMap<>();
+            Map<BarrelAsset, Set<Material>> newMap = new EnumMap<>(BarrelAsset.class);
             for (BarrelAsset asset : values()) {
                 newMap.put(asset, EnumSet.noneOf(Material.class));
             }
