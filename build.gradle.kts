@@ -144,16 +144,18 @@ tasks {
 
     processResources {
         outputs.upToDateWhen { false }
-        filter<ReplaceTokens>(mapOf(
-            "tokens" to mapOf("version" to "${project.version};${getGitBranch()}"),
-            "beginToken" to "\${",
-            "endToken" to "}"
-        )).filteringCharset = encoding
+        filter<ReplaceTokens>(
+            mapOf(
+                "tokens" to mapOf("version" to "${project.version};${getGitBranch()}"),
+                "beginToken" to "\${",
+                "endToken" to "}"
+            )
+        ).filteringCharset = encoding
     }
 
     shadowJar {
         val pack = "com.dre.brewery.depend"
-		relocate("com.google.gson", "$pack.google.gson")
+        relocate("com.google.gson", "$pack.google.gson")
         relocate("com.google.errorprone", "$pack.google.errorprone")
         relocate("com.github.Anon8281.universalScheduler", "$pack.universalScheduler")
         relocate("eu.okaeri", "$pack.okaeri")
@@ -258,8 +260,10 @@ modrinth {
     versionType.set("release") // This is the default -- can also be `beta` or `alpha`
     uploadFile.set(tasks.shadowJar)
     loaders.addAll("bukkit", "spigot", "paper", "purpur", "folia")
-    gameVersions.addAll("1.13.2", "1.14.4", "1.15.2", "1.16.5", "1.17.1", "1.18.2", "1.19.4",
-        "1.20.4", "1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4")
+    gameVersions.addAll(
+        "1.16.5", "1.17.1", "1.18.2", "1.19.4",
+        "1.20.4", "1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4"
+    )
     changelog.set(readChangeLog())
 }
 
@@ -276,7 +280,7 @@ hangarPublish {
                 // TODO: Ask in paper discord
                 //url.set("https://modrinth.com/plugin/breweryx/versions")
                 jar.set(tasks.shadowJar.flatMap { it.archiveFile })
-                platformVersions.set(listOf("1.13.x", "1.14.x", "1.15.x", "1.16.x", "1.17.x", "1.18.x", "1.19.x", "1.20.x", "1.21.x"))
+                platformVersions.set(listOf("1.17.x", "1.18.x", "1.19.x", "1.20.x", "1.21.x"))
             }
         }
     }
