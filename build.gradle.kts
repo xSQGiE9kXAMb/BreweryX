@@ -177,7 +177,7 @@ tasks {
             // but, may want to look into finding a small plugin for this since BreweryX has
             // a variety of addons that would also need this code copied into them.
             val webhook = DiscordWebhook(System.getenv("DISCORD_WEBHOOK") ?: return@doLast)
-            webhook.message = "@everyone"
+            webhook.message = "<@&1393584912652566571>"
             webhook.embedTitle = "BreweryX - v${project.version}"
             webhook.embedDescription = readChangeLog()
             webhook.send()
@@ -190,7 +190,7 @@ tasks {
 
     register("publishToDiscord") {
         val webhook = DiscordWebhook(System.getenv("DISCORD_WEBHOOK"))
-        webhook.message = "@everyone"
+        webhook.message = "<@&1393584912652566571>"
         webhook.embedTitle = "BreweryX - v${project.version}"
         webhook.embedDescription = readChangeLog()
         webhook.send()
