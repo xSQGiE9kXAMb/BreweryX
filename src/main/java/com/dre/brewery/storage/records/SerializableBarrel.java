@@ -50,7 +50,7 @@ public record SerializableBarrel(String id, String serializedLocation, List<Inte
     public CompletableFuture<Barrel> toBarrel() {
         Location loc = DataManager.deserializeLocation(serializedLocation);
         if (loc == null) {
-            return null;
+            return CompletableFuture.completedFuture(null);
         }
         return Barrel.computeSmall(loc).thenApplyAsync(small ->
             new Barrel(loc.getBlock(), sign, BoundingBox.fromPoints(bounds), BukkitSerialization.itemStackArrayFromBase64(serializedItems), time, BUtil.uuidFromString(id), small)
