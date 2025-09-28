@@ -87,13 +87,13 @@ public final class BUtil {
      * @return The colored message, or null if msg was null
      */
     public static String color(String msg) {
-        if (msg == null) return null;
+        if (msg == null || msg.isEmpty()) return null;
         String[] texts = msg.split(String.format(WITH_DELIMITER, "&"));
 
         StringBuilder finalText = new StringBuilder();
 
         for (int i = 0; i < texts.length; i++) {
-            if (texts[i].equalsIgnoreCase("&")) {
+            if (texts[i].equalsIgnoreCase("&") && texts.length > i+1) {
                 //get the next string
                 i++;
                 if (texts[i].charAt(0) == '#') {
