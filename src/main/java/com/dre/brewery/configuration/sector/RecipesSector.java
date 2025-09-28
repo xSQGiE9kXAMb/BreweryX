@@ -33,7 +33,7 @@ public class RecipesSector extends AbstractOkaeriConfigSector<ConfigRecipe> {
     // Comments not supported here
 
     ConfigRecipe ex = ConfigRecipe.builder()
-        .enabled(true)
+        .enabled(false)
         .name("Bad Example/Example/Good Example")
         .ingredients(List.of("Bedrock/2", "Spruce_Planks/8", "Bedrock/1", "Brewery:Wheatbeer/2", "ExoticGarden:Grape/3", "ex-item/4"))
         .cookingTime(3)
