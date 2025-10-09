@@ -178,3 +178,5 @@ permissions:
 # -- Misc --
   brewery.update:
     description: Get notified about new versions
+
+# Update: 2025-10-09
